@@ -29,6 +29,14 @@ template <typename T> struct Vector
         y = newY;
     }
 
+    void setX(T newX) {
+    	x = newX;
+    }
+
+    void setY(T newY) {
+    	y = newY;
+    }
+
     T getX() {
       return x;
     }

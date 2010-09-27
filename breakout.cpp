@@ -22,6 +22,9 @@ int main(int argc, char** argv) {
     // set reshap function
     glutReshapeFunc(changeSize);
 
+    // set input proccessing functions
+    glutKeyboardFunc(processNormalKeys);
+
     // main loop
     init();
     glutMainLoop();
@@ -41,25 +44,15 @@ void init(void) {
 
 
 void changeSize(GLsizei w, GLsizei h) {
-    float ratio = (h != 0) ? 1.0 * w / h : w;
-    WINDOW_WIDTH = w;
-    WINDOW_HEIGHT = h;
-    
-    // reset the coordinate system before modifying
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    // Set the viewport to be the entire window
-    glViewport(0, 0, w, h);
-    
-    // Set the correct perspective.
-    gluPerspective(45,ratio,1,1000);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0.0,0.0,5.0, 
-              0.0,0.0,-1.0,
-              0.0f,1.0f,0.0f);
+	glViewport(0,0,w,h);
+	glutReshapeWindow(WINDOW_WIDTH,WINDOW_HEIGHT);
+	glutPostRedisplay();
 }
+
+
+/**
+ *  draw funcions
+ */
 
 void drawGame(int i) {
     if(GAME->getMode() != Game::PAUSED) {
@@ -80,21 +73,55 @@ void renderGame(void) {
 
 void drawPaddle() {
     Paddle *paddle = GAME->getPaddle();
-
     // set color
     glColor3f(paddle->getColor()->getR(), 
               paddle->getColor()->getG(),
               paddle->getColor()->getB()
     );
-
-    // set position
-    float xPos = paddle->getPos()->getX();
+    // update paddle position
+    float xPos = paddle->getPos()->getX() + paddle->getSpeed();
     float yPos = paddle->getPos()->getY();
-    float w = ((float)paddle->getW()) * COORD_RANGE / WINDOW_WIDTH;
-    float h = ((float)paddle->getH()) * COORD_RANGE / WINDOW_HEIGHT;
-    
-   // double ratio =  
+    float w = paddle->getW();
+    float h = paddle->getH();
+    if(xPos < -COORD_RANGE) {
+    	xPos = -COORD_RANGE;
+    }
+    else if(xPos + w > COORD_RANGE) {
+    	xPos = COORD_RANGE - w;
+    }
+    paddle->getPos()->setX(xPos);
     glRectf(xPos, yPos, xPos+w, yPos+h);
-    printf("Drawing paddle: %f, %f, (%f, %f) \n", w, h, xPos-w/2, yPos-h/2);
+    printf("Drawing paddle: %f, %f, (%f, %f), speed: %f\n", w, h, xPos, yPos-h/2, paddle->getSpeed());
 }
+
+
+/**
+ *	input process
+ */
+
+void processNormalKeys(unsigned char key, int x, int y) {
+	switch(key) {
+		case 'R':
+		case 'r':
+			// TODO configurar estado inicial do jogo
+			GAME->getPaddle()->incSpeed(PADDLE_POWER);
+			if(GAME->getPaddle()->getSpeed() > PADDLE_MAX_SPEED) {
+				GAME->getPaddle()->setSpeed(PADDLE_MAX_SPEED);
+			}
+			printf("\nMUDOU VELOCIDADE: %f\n", GAME->getPaddle()->getSpeed());
+			// TODO speed = mousex * power
+			GAME->setMode(Game::RUNNING);
+			break;
+		case 'E':
+		case 'e':
+			GAME->getPaddle()->incSpeed(-PADDLE_POWER);
+			if(GAME->getPaddle()->getSpeed() < -PADDLE_MAX_SPEED) {
+				GAME->getPaddle()->setSpeed(-PADDLE_MAX_SPEED);
+			}
+			GAME->setMode(Game::RUNNING);
+			break;
+	}
+	drawGame(0);
+}
+
 

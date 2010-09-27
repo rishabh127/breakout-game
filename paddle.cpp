@@ -5,11 +5,12 @@
 #include "paddle.h"
 
 
-Paddle::Paddle(int w, int h, Color *c) {
+Paddle::Paddle(float w, float h, Color *c) {
     this->w = w;
     this->h = h;
     this->color = c;
     pos = new Vector<float>();
+    this->speed = 0.0;
 }
 
 Paddle::~Paddle() {
@@ -17,19 +18,19 @@ Paddle::~Paddle() {
     delete this->pos;
 }
 
-void Paddle::setW(int w) {
+void Paddle::setW(float w) {
     this->w = w;
 }
 
-int Paddle::getW() {
+float Paddle::getW() {
     return this->w;
 }
 
-void Paddle::setH(int h) {
+void Paddle::setH(float h) {
     this->h = h;
 }
 
-int Paddle::getH() {
+float Paddle::getH() {
     return this->h;
 }
 
@@ -51,5 +52,17 @@ void Paddle::setColor(Color *color) {
 
 Color *Paddle::getColor() {
     return this->color;
+}
+
+void Paddle::setSpeed(float speed) {
+	this->speed = speed;
+}
+
+void Paddle::incSpeed(float inc) {
+	this->speed += inc;
+}
+
+float Paddle::getSpeed() {
+	return this->speed;
 }
 

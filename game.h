@@ -11,13 +11,15 @@
 
 // constants
 // paddle
-#define PADDLE_DEFAULT_WIDTH        100
-#define PADDLE_DEFAULT_HEIGHT       20
+#define PADDLE_DEFAULT_WIDTH        0.22
+#define PADDLE_DEFAULT_HEIGHT       0.04
 #define PADDLE_DEFAULT_COLOR_R      1.0f
 #define PADDLE_DEFAULT_COLOR_G      0.0f
 #define PADDLE_DEFAULT_COLOR_B      0.0f
-#define PADDLE_DEFAULT_POS_X        -0.177
-#define PADDLE_DEFAULT_POS_Y        -2.0
+#define PADDLE_DEFAULT_POS_X        -0.11
+#define PADDLE_DEFAULT_POS_Y        -0.97
+#define PADDLE_POWER				0.0002
+#define PADDLE_MAX_SPEED			0.005
 
 
 class Game

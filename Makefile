@@ -3,6 +3,9 @@ LIBS = -lglut -lGLU -lGL -lXext -lX11 -lm
 FLAGS = -Wall
 CC = g++
 
+all: breakout.o brick.o paddle.o color.o game.o vector.h
+	$(CC) breakout.o game.o brick.o paddle.o color.o $(FLAGS) $(LIBS) -o $(TARGET)
+
 $(TARGET): breakout.o brick.o paddle.o color.o game.o vector.h
 	$(CC) breakout.o game.o brick.o paddle.o color.o $(FLAGS) $(LIBS) -o $(TARGET)
 

@@ -11,26 +11,29 @@
 
 class Paddle
 {
-    int w;              // width, in pixels
-    int h;              // height, in pixels
-    Vector<float> *pos; // position
-    Color *color;       // RGB color
-    //TODO xspeed
+    float w;              	// width, in pixels
+    float h;              	// height, in pixels
+    Vector<float> *pos;		// position
+    Color *color;       	// RGB color
+    float speed;			// paddle x speed
 
   public:
     
-    Paddle(int w, int h, Color *c);
+    Paddle(float w, float h, Color *c);
     ~Paddle();
 
-    void setW(int w);
-    int getW();
-    void setH(int h);
-    int getH();
+    void setW(float w);
+    float getW();
+    void setH(float h);
+    float getH();
     void setPos(Vector<float> *pos);
     void setPos(float x, float y);
     Vector<float> *getPos();
     void setColor(Color *c);
     Color *getColor();
+    void setSpeed(float speed);
+    void incSpeed(float inc);
+    float getSpeed();
 };
 
 
