@@ -35,6 +35,12 @@ Game::GameMode Game::getMode() {
     return this->mode;
 }
 
+Game::GameMode Game::swapMode() {
+	Game::GameMode newMode = (this->mode == PAUSED) ? RUNNING : PAUSED;
+	this->mode = newMode;
+	return newMode;
+}
+
 void Game::setPaddle(Paddle *paddle) {
     this->paddle = paddle;
 }
@@ -42,4 +48,3 @@ void Game::setPaddle(Paddle *paddle) {
 Paddle *Game::getPaddle() {
     return this->paddle;
 }
-

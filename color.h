@@ -17,11 +17,11 @@ class Color {
     Color();
     Color(float r, float g, float b);
     
-    void setR(int r);
+    void setR(float r);
     float getR();
-    void setG(int g);
+    void setG(float g);
     float getG();
-    void setB(int b);
+    void setB(float b);
     float getB();
   
 };

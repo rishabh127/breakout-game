@@ -24,6 +24,9 @@ int main(int argc, char** argv) {
 
     // set input proccessing functions
     glutKeyboardFunc(processNormalKeys);
+    glutMouseFunc(processMouse);
+   	glutPassiveMotionFunc(processMousePassiveMotion);
+   	glutEntryFunc(processMouseEntry);
 
     // main loop
     init();
@@ -91,7 +94,8 @@ void drawPaddle() {
     }
     paddle->getPos()->setX(xPos);
     glRectf(xPos, yPos, xPos+w, yPos+h);
-    printf("Drawing paddle: %f, %f, (%f, %f), speed: %f\n", w, h, xPos, yPos-h/2, paddle->getSpeed());
+    printf("Drawing paddle: %f, %f, (%f, %f), speed: %f COLOR: (%f, %f, %f)\n", w, h, xPos, yPos-h/2, paddle->getSpeed(),
+    		paddle->getColor()->getR(),paddle->getColor()->getG(),paddle->getColor()->getB());
 }
 
 
@@ -104,24 +108,61 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		case 'R':
 		case 'r':
 			// TODO configurar estado inicial do jogo
-			GAME->getPaddle()->incSpeed(PADDLE_POWER);
-			if(GAME->getPaddle()->getSpeed() > PADDLE_MAX_SPEED) {
-				GAME->getPaddle()->setSpeed(PADDLE_MAX_SPEED);
-			}
-			printf("\nMUDOU VELOCIDADE: %f\n", GAME->getPaddle()->getSpeed());
-			// TODO speed = mousex * power
 			GAME->setMode(Game::RUNNING);
 			break;
-		case 'E':
-		case 'e':
-			GAME->getPaddle()->incSpeed(-PADDLE_POWER);
-			if(GAME->getPaddle()->getSpeed() < -PADDLE_MAX_SPEED) {
-				GAME->getPaddle()->setSpeed(-PADDLE_MAX_SPEED);
-			}
-			GAME->setMode(Game::RUNNING);
-			break;
+		case 'Q':
+		case 'q':
+			exit(0);
 	}
 	drawGame(0);
 }
+
+void processMouse(int button, int state, int x, int y) {
+	if(state == GLUT_DOWN) {
+		if (button == GLUT_LEFT_BUTTON) {
+			printf("[ INFO ] left mouse button pressed\n");
+			GAME->swapMode();
+			if(GAME->getMode() == Game::RUNNING) {
+				drawGame(0);
+			}
+		}
+		else if (button == GLUT_MIDDLE_BUTTON) {
+			printf("[ INFO ] middle mouse button pressed\n");
+		}
+		else {
+			printf("[ INFO ] right mouse button pressed\n");
+			//TODO print info
+			GAME->setMode(Game::RUNNING);
+			processMousePassiveMotion(x, y);
+			renderGame();
+			GAME->setMode(Game::PAUSED);
+		}
+	}
+}
+
+void processMousePassiveMotion(int x, int y) {
+	if(GAME->getMode() != Game::PAUSED) {
+		// update paddle speed
+		float mouseLoc = (float)x;
+		if(WINDOW_WIDTH != 0) {
+			mouseLoc /= WINDOW_WIDTH;
+		}
+		float paddleSpeed = mouseLoc * PADDLE_POWER;
+		GAME->getPaddle()->setSpeed(paddleSpeed - PADDLE_POWER/2.0);
+
+		// update paddle color
+		GAME->getPaddle()->getColor()->setR(1.0 - mouseLoc);
+		GAME->getPaddle()->getColor()->setG(mouseLoc);
+		printf("COLORS -> R: %f, G: %f\n", 1.0-mouseLoc, mouseLoc);
+	}
+}
+
+void processMouseEntry(int state) {
+	MOUSE_IN = (state == GLUT_LEFT) ? false : true;
+}
+
+
+
+
 
 

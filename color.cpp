@@ -14,7 +14,7 @@ Color::Color(float r, float g, float b) {
     this->b = b;
 }
 
-void Color::setR(int r) {
+void Color::setR(float r) {
     this->r = r;
 }
 
@@ -22,7 +22,7 @@ float Color::getR() {
   return this->r;
 }
 
-void Color::setG(int g) {
+void Color::setG(float g) {
     this->g = g;
 }
 
@@ -30,7 +30,7 @@ float Color::getG() {
   return this->g;
 }
 
-void Color::setB(int b) {
+void Color::setB(float b) {
     this->b = b;
 }
 

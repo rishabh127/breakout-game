@@ -9,13 +9,13 @@ Paddle::Paddle(float w, float h, Color *c) {
     this->w = w;
     this->h = h;
     this->color = c;
-    pos = new Vector<float>();
+    this->pos = new Vector<float>();
     this->speed = 0.0;
 }
 
 Paddle::~Paddle() {
+	delete this->pos;
     delete this->color;
-    delete this->pos;
 }
 
 void Paddle::setW(float w) {
