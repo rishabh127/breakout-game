@@ -5,26 +5,34 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include "vector.h"
-#include "color.h"
+#include "entity.h"
 
 
-class Ball
+class Ball : public Entity
 {
 
-    Vector<float> *pos;		// position
-    Vector<float> *dir		// direction
-    Color *color;       	// RGB color
-    int radius;				// ball readius
+    Vector<float> *dir;		// direction
+    float radius;			// ball radius
     float speed;			// paddle x speed
 
   public:
 
-    Ball();
-    Ball(int radius, Color *c);
+    Ball(float radius, Color *c);
+
     ~Ball();
 
+    void setDir(Vector<float> *dir);
+    void setDir(float x, float y);
+    Vector<float> *getDir();
 
+    void setRadius(float radius);
+    float getRadius();
+
+    void setSpeed(float speed);
+    void incSpeed(float inc);
+    float getSpeed();
+
+    bool collide(Entity *e);
 
 };
 

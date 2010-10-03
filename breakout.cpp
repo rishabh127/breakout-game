@@ -36,7 +36,11 @@ int main(int argc, char** argv) {
 
 void init(void) {
     // set background color as black
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(WINDOW_DEFAULT_COLOR_R,
+				 WINDOW_DEFAULT_COLOR_G,
+				 WINDOW_DEFAULT_COLOR_B,
+				 1.0f
+	);
     glDisable(GL_DEPTH_TEST);
     
     // set global variables
@@ -59,6 +63,8 @@ void changeSize(GLsizei w, GLsizei h) {
 
 void drawGame(int i) {
     if(GAME->getMode() != Game::PAUSED) {
+    	GAME->updatePaddle();
+    	GAME->updateBall();
         renderGame();
         glutTimerFunc(TIMER_MSECS, drawGame, 1);
     }
@@ -69,33 +75,62 @@ void renderGame(void) {
     glPushMatrix();
     
     drawPaddle();
-    
+    drawBall();
+
     glPopMatrix();
     glutSwapBuffers();
 }
 
 void drawPaddle() {
     Paddle *paddle = GAME->getPaddle();
+
     // set color
     glColor3f(paddle->getColor()->getR(), 
               paddle->getColor()->getG(),
               paddle->getColor()->getB()
     );
-    // update paddle position
-    float xPos = paddle->getPos()->getX() + paddle->getSpeed();
-    float yPos = paddle->getPos()->getY();
-    float w = paddle->getW();
-    float h = paddle->getH();
-    if(xPos < -COORD_RANGE) {
-    	xPos = -COORD_RANGE;
-    }
-    else if(xPos + w > COORD_RANGE) {
-    	xPos = COORD_RANGE - w;
-    }
-    paddle->getPos()->setX(xPos);
-    glRectf(xPos, yPos, xPos+w, yPos+h);
-    printf("Drawing paddle: %f, %f, (%f, %f), speed: %f COLOR: (%f, %f, %f)\n", w, h, xPos, yPos-h/2, paddle->getSpeed(),
-    		paddle->getColor()->getR(),paddle->getColor()->getG(),paddle->getColor()->getB());
+
+    // set position
+    glRectf(paddle->getPos()->getX(),
+    		paddle->getPos()->getY(),
+    		paddle->getPos()->getX() + paddle->getW(),
+    		paddle->getPos()->getY() + paddle->getH());
+
+    //printf("Drawing paddle: %f, %f, (%f, %f), speed: %f COLOR: (%f, %f, %f)\n", w, h, xPos, yPos-h/2, paddle->getSpeed(),
+    //		paddle->getColor()->getR(),paddle->getColor()->getG(),paddle->getColor()->getB());
+}
+
+void drawBall() {
+	Ball *ball = GAME->getBall();
+
+	// set color
+	glColor3f(ball->getColor()->getR(),
+			ball->getColor()->getG(),
+	        ball->getColor()->getB()
+	);
+
+	// draw a solid disc from a bunch of triangles
+	float originX = ball->getPos()->getX();
+	float originY = ball->getPos()->getY();
+	float vectorX1 = originX, vectorY1 = originY;
+	float radius = ball->getRadius();
+	glBegin(GL_TRIANGLES);
+		for (int i = 0; i <= NUM_TRIANGLES_IN_CIRCLE; i++) {
+			float angle = (float) (((double) i) / TRIANGLE_ANGLE_IN_CIRCLE);
+			float vectorX = originX + (radius * (float) sin((double) angle));
+			float vectorY = originY + (radius * (float) cos((double) angle));
+			glVertex2d(originX, originY);
+			glVertex2d(vectorX1, vectorY1);
+			glVertex2d(vectorX, vectorY);
+			vectorY1 = vectorY;
+			vectorX1 = vectorX;
+		}
+	glEnd();
+
+	printf("BALL: pos: (%f, %f), dir: (%f, %f), speed = %f\n",
+			ball->getPos()->getX(), ball->getPos()->getY(),
+			ball->getDir()->getX(), ball->getDir()->getY(),
+			ball->getSpeed());
 }
 
 
@@ -107,14 +142,16 @@ void processNormalKeys(unsigned char key, int x, int y) {
 	switch(key) {
 		case 'R':
 		case 'r':
-			// TODO configurar estado inicial do jogo
-			GAME->setMode(Game::RUNNING);
+			GAME->reset();
+			renderGame();
+			GAME->setMode(Game::PAUSED);
 			break;
 		case 'Q':
 		case 'q':
 			exit(0);
 	}
-	drawGame(0);
+	//drawGame(0);
+	//TODO olhar porq outras teclas aceleram
 }
 
 void processMouse(int button, int state, int x, int y) {
@@ -123,6 +160,7 @@ void processMouse(int button, int state, int x, int y) {
 			printf("[ INFO ] left mouse button pressed\n");
 			GAME->swapMode();
 			if(GAME->getMode() == Game::RUNNING) {
+				processMousePassiveMotion(x, y);
 				drawGame(0);
 			}
 		}
@@ -134,7 +172,7 @@ void processMouse(int button, int state, int x, int y) {
 			//TODO print info
 			GAME->setMode(Game::RUNNING);
 			processMousePassiveMotion(x, y);
-			renderGame();
+			drawGame(0);
 			GAME->setMode(Game::PAUSED);
 		}
 	}
@@ -160,9 +198,5 @@ void processMousePassiveMotion(int x, int y) {
 void processMouseEntry(int state) {
 	MOUSE_IN = (state == GLUT_LEFT) ? false : true;
 }
-
-
-
-
 
 
