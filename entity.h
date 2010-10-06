@@ -14,7 +14,6 @@
 
 class Entity
 {
-
     Vector<float> *pos;		// position
     Color *color;       	// RGB color
     float w;				// width, in pixels
@@ -38,6 +37,8 @@ class Entity
 
 	void setH(float h);
 	float getH();
+
+	bool collide(Entity *e);
 
 };
 

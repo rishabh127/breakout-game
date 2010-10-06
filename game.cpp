@@ -10,17 +10,36 @@ Game::Game() {
 	this->paddle = new Paddle(PADDLE_DEFAULT_WIDTH, PADDLE_DEFAULT_HEIGHT,
 		new Color(PADDLE_DEFAULT_COLOR_R, PADDLE_DEFAULT_COLOR_G,
 		PADDLE_DEFAULT_COLOR_B));
-	this->paddle->setPos(PADDLE_DEFAULT_POS_X, PADDLE_DEFAULT_POS_Y);
 
 	// set ball
 	this->ball = new Ball(BALL_DEFAULT_RADIUS, new Color(BALL_DEFAULT_COLOR_R,
 		BALL_DEFAULT_COLOR_G, BALL_DEFAULT_COLOR_B));
-	this->ball->setPos(BALL_DEFAULT_POS_X, BALL_DEFAULT_POS_Y);
-	this->ball->setDir(BALL_DEFAULT_DIR_X, BALL_DEFAULT_DIR_Y);
-	this->ball->setSpeed(BALL_DEFAULT_SPEED);
 
 	// set bricks
 	this->bricks = new std::list<Brick *>();
+
+	reset();
+}
+
+void Game::reset() {
+    // set paddle
+	paddle->setW(PADDLE_DEFAULT_WIDTH);
+	paddle->setH(PADDLE_DEFAULT_HEIGHT);
+	paddle->getColor()->setR(PADDLE_DEFAULT_COLOR_R);
+	paddle->getColor()->setG(PADDLE_DEFAULT_COLOR_G);
+	paddle->getColor()->setB(PADDLE_DEFAULT_COLOR_B);
+	paddle->setPos(PADDLE_DEFAULT_POS_X, PADDLE_DEFAULT_POS_Y);
+
+	// set ball
+	ball->setRadius(BALL_DEFAULT_RADIUS);
+	ball->getColor()->setR(BALL_DEFAULT_COLOR_R);
+	ball->getColor()->setG(BALL_DEFAULT_COLOR_G);
+	ball->getColor()->setB(BALL_DEFAULT_COLOR_B);
+	ball->setPos(BALL_DEFAULT_POS_X, BALL_DEFAULT_POS_Y);
+	ball->setDir(BALL_DEFAULT_DIR_X, BALL_DEFAULT_DIR_Y);
+	ball->setSpeed(BALL_DEFAULT_SPEED);
+
+	// set bricks
 	generateBricks(10, 10);
 
 	// set game mode
@@ -33,9 +52,12 @@ Game::Game() {
 	this->life = NUM_OF_LIFES;
 }
 
+
 Game::~Game() {
     delete this->paddle;
+    delete this->ball;
 }
+
 
 /*
  * game mode
@@ -71,9 +93,7 @@ Paddle *Game::getPaddle() {
 void Game::updatePaddle() {
 	// calculate paddle position
 	float xPos = this->paddle->getPos()->getX() + this->paddle->getSpeed();
-	float yPos = this->paddle->getPos()->getY();
 	float w = this->paddle->getW();
-	float h = this->paddle->getH();
 
 	// check colision -
 	if (xPos < -COORD_RANGE) {
@@ -86,7 +106,7 @@ void Game::updatePaddle() {
 	paddle->getPos()->setX(xPos);
 
 	// check colision - ball
-	if (collide()) {
+	if (paddle->collide(ball)) {
 		if (!isColliding) {
 			ball->getDir()->setY(
 				- ball->getDir()->getY()
@@ -121,7 +141,11 @@ void Game::updateBall() {
 	float yPos = this->ball->getPos()->getY() +
 			this->ball->getSpeed() * yDir;
 
-	// check colision - fields
+	// update position
+	ball->getPos()->setX(xPos);
+	ball->getPos()->setY(yPos);
+
+	// check collision - fields
 	if (xPos - radius <= -COORD_RANGE) {
 		xPos = -COORD_RANGE + radius;
 		ball->getDir()->setX(-xDir);
@@ -140,12 +164,8 @@ void Game::updateBall() {
 			//TODO loose life
 	}
 
-	// update position
-	ball->getPos()->setX(xPos);
-	ball->getPos()->setY(yPos);
-
-	// check colision
-	if(collide()) {
+	// check collision with paddle
+	if(ball->collide(this->paddle)) {
 		if(!isColliding) {
 			ball->getDir()->setY(-yDir);
 			ball->getDir()->setX( ( (ball->getPos()->getX() - (paddle->getPos()->getX()
@@ -154,14 +174,13 @@ void Game::updateBall() {
 			if(ball->getSpeed() < BALL_MIN_SPEED) {
 				ball->setSpeed(BALL_MIN_SPEED);
 			}
-			printf("\nMAIS VEL: %f pseed: %f ballSpped = %f \n", fabs(paddle->getSpeed()) - PADDLE_POWER/4, paddle->getSpeed(), ball->getSpeed());
 			isColliding = true;
 		}
 		return;
 	}
 
 	// check collision if bricks
-	if (collideWithBrick()) {
+	if (ball->collide(*bricks->begin())) {
 		if (!isColliding) {
 			ball->getDir()->setY(-yDir);
 			//ball->getDir()->setX(-xDir);
@@ -210,86 +229,8 @@ void Game::generateBricks(int bricksPerLine, int numLines) {
 	this->bricks->push_back(brick);
 }
 
-bool Game::collideWithBrick() {
-	float bX = ball->getPos()->getX();
-	float bY = ball->getPos()->getY();
-	float radius = ball->getRadius();
-
-	Brick *b = (*this->bricks->begin());
-
-	float pX = b->getPos()->getX();
-	float pY = b->getPos()->getY();
-	float pH = b->getH();
-	float pW = b->getW();
-	bool collide = false;
-
-	if ( ( (bY - radius <= pY + pH) && (bY + radius >= pY) )
-			|| ( (bY + radius >= pY) && (bY - radius <= pY + pH) )  ) {
-		float maxH = bX + radius;
-		float minH = bX - radius;
-		if ((maxH >= pX) && (maxH <= pX + pW)) {
-			collide = true;
-		} else if ((minH >= pX) && (minH <= pX + pW)) {
-			collide = true;
-		}
-	}
-
-	return collide;
-}
-
-
-bool Game::collide() {
-	float bX = ball->getPos()->getX();
-	float bY = ball->getPos()->getY();
-	float radius = ball->getRadius();
-	float pX = paddle->getPos()->getX();
-	float pY = paddle->getPos()->getY();
-	float pH = paddle->getH();
-	float pW = paddle->getW();
-	bool collide = false;
-
-	if (bY - radius < pY + pH) {
-		float maxH = bX + radius;
-		float minH = bX - radius;
-		if ((maxH >= pX) && (maxH <= pX + pW)) {
-			collide = true;
-		} else if ((minH >= pX) && (minH <= pX + pW)) {
-			collide = true;
-		}
-	}
-
-	return collide;
-}
-
-
 /*
  * game options
  */
 
-void Game::reset() {
-    // set paddle
-	paddle->setW(PADDLE_DEFAULT_WIDTH);
-	paddle->setH(PADDLE_DEFAULT_HEIGHT);
-	paddle->getColor()->setR(PADDLE_DEFAULT_COLOR_R);
-	paddle->getColor()->setG(PADDLE_DEFAULT_COLOR_G);
-	paddle->getColor()->setB(PADDLE_DEFAULT_COLOR_B);
-	paddle->setPos(PADDLE_DEFAULT_POS_X, PADDLE_DEFAULT_POS_Y);
 
-	// set ball
-	ball->setRadius(BALL_DEFAULT_RADIUS);
-	ball->getColor()->setR(BALL_DEFAULT_COLOR_R);
-	ball->getColor()->setG(BALL_DEFAULT_COLOR_G);
-	ball->getColor()->setB(BALL_DEFAULT_COLOR_B);
-	ball->setPos(BALL_DEFAULT_POS_X, BALL_DEFAULT_POS_Y);
-	ball->setDir(BALL_DEFAULT_DIR_X, BALL_DEFAULT_DIR_Y);
-	ball->setSpeed(BALL_DEFAULT_SPEED);
-
-	// set game mode
-	this->mode = PAUSED;
-
-	// set colliding test
-	this->isColliding = false;
-
-	// set number of lifes
-	this->life = NUM_OF_LIFES;
-}

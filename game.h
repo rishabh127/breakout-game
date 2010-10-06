@@ -93,10 +93,6 @@ class Game
         void setBricks(std::list<Brick *> *bricks);
         std::list<Brick *> *getBricks();
 
-
-        bool collideWithBrick();
-        bool collide();
-
         void reset();
 
 };

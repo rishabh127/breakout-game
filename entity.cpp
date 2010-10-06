@@ -56,3 +56,21 @@ float Entity::getH() {
 	return this->h;
 }
 
+bool Entity::collide(Entity *e) {
+
+	bool collide = false;
+
+	if ( ( (pos->getY() - h <= e->pos->getY() + e->h)
+			&& (pos->getY() + h >= e->pos->getY()) )
+			|| ( (pos->getY() + h >= e->pos->getY()) && (pos->getY() - h <= e->pos->getY() + e->h) )  ) {
+		float maxH = pos->getX() + w;
+		float minH = pos->getX() - w;
+		if ( (maxH >= e->getPos()->getX()) && (maxH <= e->getPos()->getX() + e->getW()) ) {
+			collide = true;
+		} else if ( (minH >= e->getPos()->getX()) && (minH <= e->getPos()->getX() + e->getW()) ) {
+			collide = true;
+		}
+	}
+
+	return collide;
+}
