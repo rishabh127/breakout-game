@@ -76,6 +76,7 @@ void renderGame(void) {
     
     drawPaddle();
     drawBall();
+    drawBricks();
 
     glPopMatrix();
     glutSwapBuffers();
@@ -127,12 +128,32 @@ void drawBall() {
 		}
 	glEnd();
 
-	printf("BALL: pos: (%f, %f), dir: (%f, %f), speed = %f\n",
-			ball->getPos()->getX(), ball->getPos()->getY(),
-			ball->getDir()->getX(), ball->getDir()->getY(),
-			ball->getSpeed());
+	//printf("BALL: pos: (%f, %f), dir: (%f, %f), speed = %f\n",
+	//		ball->getPos()->getX(), ball->getPos()->getY(),
+	//		ball->getDir()->getX(), ball->getDir()->getY(),
+	//		ball->getSpeed());
 }
 
+
+void drawBricks() {
+	std::list<Brick *> *bricks = GAME->getBricks();
+	std::list<Brick *>::iterator itr;
+
+	for (itr = bricks->begin(); itr != bricks->end(); itr++) {
+		Brick *brick = (*itr);
+		// set color
+		glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
+				brick->getColor()->getB());
+
+		// set position
+		glRectf(brick->getPos()->getX(), brick->getPos()->getY(),
+				brick->getPos()->getX() + brick->getW(),
+				brick->getPos()->getY() + brick->getH());
+		printf("ALALAL: %f %f %f %f\n\n", brick->getPos()->getX(), brick->getPos()->getY(),
+				brick->getPos()->getX() + brick->getW(),
+				brick->getPos()->getY() + brick->getH());
+	}
+}
 
 /**
  *	input process
@@ -191,7 +212,7 @@ void processMousePassiveMotion(int x, int y) {
 		// update paddle color
 		GAME->getPaddle()->getColor()->setR(1.0 - mouseLoc);
 		GAME->getPaddle()->getColor()->setG(mouseLoc);
-		printf("COLORS -> R: %f, G: %f\n", 1.0-mouseLoc, mouseLoc);
+		//printf("COLORS -> R: %f, G: %f\n", 1.0-mouseLoc, mouseLoc);
 	}
 }
 

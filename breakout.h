@@ -32,6 +32,7 @@ void drawGame(int i);
 void renderGame(void);
 void drawPaddle();
 void drawBall();
+void drawBricks();
 
 void processNormalKeys(unsigned char key, int x, int y);
 void processMouse(int button, int state, int x, int y);

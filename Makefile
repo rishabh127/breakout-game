@@ -1,31 +1,31 @@
 TARGET = breakout
-LIBS = -lglut -lGLU -lGL -lXext -lX11 -lm
-FLAGS = -Wall
+LIBS = -lglut -lGLU -lGL -lXext -lX11 -lm -g
+FLAGS = -Wall -g
 CC = g++
 
 all: breakout.o game.o ball.o brick.o paddle.o color.o vector.h entity.o 
 	$(CC) breakout.o game.o ball.o brick.o paddle.o color.o entity.o $(FLAGS) $(LIBS) -o $(TARGET)
 
 breakout.o: breakout.h breakout.cpp
-	$(CC) breakout.cpp -c
+	$(CC) $(FLAGS) breakout.cpp -c
 
 game.o: game.h game.cpp
-	$(CC) game.cpp -c
+	$(CC) $(FLAGS) game.cpp -c
 
 brick.o: brick.h brick.cpp
-	$(CC) brick.cpp -c
+	$(CC) $(FLAGS) brick.cpp -c
 
 paddle.o: paddle.h paddle.cpp
-	$(CC) paddle.cpp -c
+	$(CC) $(FLAGS) paddle.cpp -c
 	
 ball.o: ball.h ball.cpp
-	$(CC) ball.cpp -c
+	$(CC) $(FLAGS) ball.cpp -c
 
 color.o: color.h color.cpp
-	$(CC) color.cpp -c
+	$(CC) $(FLAGS) color.cpp -c
 
 entity.o: entity.h entity.cpp
-	$(CC) entity.cpp -c
+	$(CC) $(FLAGS) entity.cpp -c
 
 
 clean:

@@ -5,6 +5,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <iostream>
+#include <list>
 #include "brick.h"
 #include "paddle.h"
 #include "ball.h"
@@ -40,11 +42,12 @@
 #define BALL_DEFAULT_COLOR_R       0.0f
 #define BALL_DEFAULT_COLOR_G       0.0f
 #define BALL_DEFAULT_COLOR_B       0.0f
-#define BALL_DEFAULT_DIR_X         0.2
-#define BALL_DEFAULT_DIR_Y         0.2
+#define BALL_DEFAULT_DIR_X         0.0001
+#define BALL_DEFAULT_DIR_Y         0.16
 #define BALL_DEFAULT_POS_X         PADDLE_DEFAULT_POS_X + PADDLE_DEFAULT_WIDTH/2
 #define BALL_DEFAULT_POS_Y         PADDLE_DEFAULT_POS_Y + PADDLE_DEFAULT_HEIGHT + BALL_DEFAULT_RADIUS + 0.001
-#define BALL_DEFAULT_SPEED		   0.15
+#define BALL_DEFAULT_SPEED		   0.2
+#define BALL_MIN_SPEED			   0.06
 
 // bricks
 //TODO
@@ -64,7 +67,7 @@ class Game
         enum GameMode mode;
         Paddle *paddle;
         Ball *ball;
-//        List<Brick> bricks;
+        std::list<Brick *> *bricks;
 
         bool isColliding;
         int life;
@@ -86,6 +89,12 @@ class Game
         Ball *getBall();
         void updateBall();
 
+        void generateBricks(int bricksPerLine, int numLines);
+        void setBricks(std::list<Brick *> *bricks);
+        std::list<Brick *> *getBricks();
+
+
+        bool collideWithBrick();
         bool collide();
 
         void reset();
