@@ -96,8 +96,8 @@ void Game::updatePaddle() {
 	float w = this->paddle->getW();
 
 	// check colision -
-	if (xPos < -COORD_RANGE) {
-		xPos = -COORD_RANGE;
+	if (xPos < 0) {
+		xPos = 0;
 	} else if (xPos + w > COORD_RANGE) {
 		xPos = COORD_RANGE - w;
 	}
@@ -146,27 +146,27 @@ void Game::updateBall() {
 	ball->getPos()->setY(yPos);
 
 	// check collision - fields
-	if (xPos - radius <= -COORD_RANGE) {
-		xPos = -COORD_RANGE + radius;
+	if (xPos <= radius) {
+		xPos = radius;
 		ball->getDir()->setX(-xDir);
 	} else if (xPos + radius >= COORD_RANGE) {
 		xPos = COORD_RANGE - radius;
 		ball->getDir()->setX(-xDir);
 	}
-	if (yPos + radius >= COORD_RANGE) {
+	if (yPos + radius >= SCORE_POSITION) {
 		yPos = COORD_RANGE - radius;
 		ball->getDir()->setY(-yDir);
 	}
-	else if (yPos - radius <= -COORD_RANGE - radius) {
+	else if (yPos <= radius) {
 			printf("\nLOOSE\n");
 	//		yPos = -COORD_RANGE + radius;
-	//		ball->getDir()->setY(-yDir);
+			ball->getDir()->setY(-yDir);
 			//TODO loose life
 	}
 
 	// check collision with paddle
 	if(ball->collide(this->paddle)) {
-		if(!isColliding) {
+		//if(!isColliding) {
 			ball->getDir()->setY(-yDir);
 			ball->getDir()->setX( ( (ball->getPos()->getX() - (paddle->getPos()->getX()
 					+ paddle->getW()/2) ) / paddle->getW() ) );
@@ -174,24 +174,25 @@ void Game::updateBall() {
 			if(ball->getSpeed() < BALL_MIN_SPEED) {
 				ball->setSpeed(BALL_MIN_SPEED);
 			}
-			isColliding = true;
-		}
-		return;
+//			isColliding = true;
+//		}
+//		return;
 	}
 
 	// check collision if bricks
-	if (ball->collide(*bricks->begin())) {
-		if (!isColliding) {
-			ball->getDir()->setY(-yDir);
+//	if (ball->collide(*bricks->begin())) {
+//		if (!isColliding) {
+//			ball->getDir()->setY(-yDir);
 			//ball->getDir()->setX(-xDir);
-			isColliding = true;
-		}
-	}
-	else {
-		isColliding = false;
+//			isColliding = true;
+//		}
 	}
 
-}
+//	else {
+//		isColliding = false;
+//	}
+
+//}
 
 
 /*
@@ -215,17 +216,24 @@ void Game::generateBricks(int bricksPerLine, int numLines) {
 	int breakLife = 3; //TODO sort life
 
 	// set brick
-	Brick *brick = new Brick(breakLife, 0.1, 0.1, new Color(0, 0.0, 1.0*life/10));
-	brick->setH(0.1);
-	brick->setW(0.2);
-	brick->setPos(0.0, 0.0);
+	Brick *brick = new Brick(breakLife, 0.04, 0.04, new Color(0, 0.0, 1.0*life/10));
+	brick->setH(0.04);
+	brick->setW(0.1);
+	brick->setPos(0.5, 0.5);
 	this->bricks->push_back(brick);
 
 	int life = 6; //TODO sort life
-	brick = new Brick(breakLife, 0.1, 0.1, new Color(0, 0.0, 1.0*life/10.0));
-	brick->setH(0.1);
-	brick->setW(0.2);
-	brick->setPos(-0.6, 0.6);
+	brick = new Brick(breakLife, 0.04, 0.04, new Color(0, 0.0, 1.0*life/10.0));
+	brick->setH(0.04);
+	brick->setW(0.1);
+	brick->setPos(0.546, 0.536);
+	this->bricks->push_back(brick);
+
+	life = 6; //TODO sort life
+	brick = new Brick(breakLife, 0.04, 0.04, new Color(0, 0.0, 1.0*life/10.0));
+	brick->setH(0.04);
+	brick->setW(0.1);
+	brick->setPos(0.45, 0.536);
 	this->bricks->push_back(brick);
 }
 

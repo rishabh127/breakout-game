@@ -51,9 +51,15 @@ void init(void) {
 
 
 void changeSize(GLsizei w, GLsizei h) {
-	glViewport(0,0,w,h);
-	glutReshapeWindow(WINDOW_WIDTH,WINDOW_HEIGHT);
-	glutPostRedisplay();
+	float windowHeight, windowWidth;
+
+	if (h == 0) {
+		h = 1;
+	}
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0, COORD_RANGE, 0, COORD_RANGE);
 }
 
 
@@ -77,6 +83,7 @@ void renderGame(void) {
     drawPaddle();
     drawBall();
     drawBricks();
+    drawScore();
 
     glPopMatrix();
     glutSwapBuffers();
@@ -96,9 +103,6 @@ void drawPaddle() {
     		paddle->getPos()->getY(),
     		paddle->getPos()->getX() + paddle->getW(),
     		paddle->getPos()->getY() + paddle->getH());
-
-    //printf("Drawing paddle: %f, %f, (%f, %f), speed: %f COLOR: (%f, %f, %f)\n", w, h, xPos, yPos-h/2, paddle->getSpeed(),
-    //		paddle->getColor()->getR(),paddle->getColor()->getG(),paddle->getColor()->getB());
 }
 
 void drawBall() {
@@ -128,10 +132,24 @@ void drawBall() {
 		}
 	glEnd();
 
-	//printf("BALL: pos: (%f, %f), dir: (%f, %f), speed = %f\n",
-	//		ball->getPos()->getX(), ball->getPos()->getY(),
-	//		ball->getDir()->getX(), ball->getDir()->getY(),
-	//		ball->getSpeed());
+	// set color
+	glColor3f(ball->getColor()->getR()-0.3,
+			ball->getColor()->getG()-0.3,
+	        ball->getColor()->getB()-0.3
+	);
+	radius = ball->getRadius() - 0.0025;
+	glBegin(GL_TRIANGLES);
+		for (int i = 0; i <= NUM_TRIANGLES_IN_CIRCLE; i++) {
+			float angle = (float) (((double) i) / TRIANGLE_ANGLE_IN_CIRCLE);
+			float vectorX = originX + (radius * (float) sin((double) angle));
+			float vectorY = originY + (radius * (float) cos((double) angle));
+			glVertex2d(originX, originY);
+			glVertex2d(vectorX1, vectorY1);
+			glVertex2d(vectorX, vectorY);
+			vectorY1 = vectorY;
+			vectorX1 = vectorX;
+		}
+	glEnd();
 }
 
 
@@ -141,18 +159,39 @@ void drawBricks() {
 
 	for (itr = bricks->begin(); itr != bricks->end(); itr++) {
 		Brick *brick = (*itr);
+
 		// set color
-		glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
-				brick->getColor()->getB());
+		//glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
+		//		brick->getColor()->getB());
+
 
 		// set position
+		glColor3f(0.6,0.42,0.21);
 		glRectf(brick->getPos()->getX(), brick->getPos()->getY(),
-				brick->getPos()->getX() + brick->getW(),
-				brick->getPos()->getY() + brick->getH());
-		printf("ALALAL: %f %f %f %f\n\n", brick->getPos()->getX(), brick->getPos()->getY(),
-				brick->getPos()->getX() + brick->getW(),
-				brick->getPos()->getY() + brick->getH());
+			brick->getPos()->getX() + brick->getW(),
+			brick->getPos()->getY() + brick->getH());
+
+		// set position
+		glColor3f(0.5,0.0,0.0);
+		glRectf(brick->getPos()->getX()+0.004, brick->getPos()->getY()+0.004,
+				brick->getPos()->getX() + brick->getW() - 0.004,
+				brick->getPos()->getY() + brick->getH() - 0.004);
 	}
+}
+
+void drawScore() {
+
+	// set line color
+	glColor3f(SCORE_LINE_DEFAULT_COLOR_R,
+			  SCORE_LINE_DEFAULT_COLOR_G,
+			  SCORE_LINE_DEFAULT_COLOR_B
+	);
+
+	// draw line
+	glBegin(GL_LINES);
+		glVertex2f(0.0, SCORE_POSITION);
+		glVertex2f(COORD_RANGE, SCORE_POSITION);
+	glEnd();
 }
 
 /**

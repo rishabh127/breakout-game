@@ -12,7 +12,7 @@
 #include "game.h"
 
 // constants
-#define NUM_TRIANGLES_IN_CIRCLE		360
+#define NUM_TRIANGLES_IN_CIRCLE		720
 #define TRIANGLE_ANGLE_IN_CIRCLE	57.29577957795135
 
 
@@ -38,6 +38,8 @@ void processNormalKeys(unsigned char key, int x, int y);
 void processMouse(int button, int state, int x, int y);
 void processMousePassiveMotion(int x, int y);
 void processMouseEntry(int state);
+
+void drawScore();
 
 
 #endif
