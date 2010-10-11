@@ -40,7 +40,7 @@ void Game::reset() {
 	ball->setSpeed(BALL_DEFAULT_SPEED);
 
 	// set bricks
-	generateBricks(6, 6, BRICKS_HEIGHT);
+	generateBricks(5, 5, BRICKS_HEIGHT);
 	bricksTotal = bricks->size();
 
 	this->newGame = true;

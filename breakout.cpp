@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     glutCreateWindow(WINDOW_TITLE);
 
     // set draw function
-    glutDisplayFunc(renderGame);
+    glutDisplayFunc(drawPaused);
     glutTimerFunc(TIMER_MSECS, drawGame, 1);
 
     // set reshap function
@@ -48,6 +48,7 @@ void init(void) {
     WINDOW_WIDTH = WINDOW_INIT_WIDTH;
     WINDOW_HEIGHT = WINDOW_INIT_HEIGHT;
     LAST_MODE = Game::STARTING;
+	glLineWidth(8.0);
 }
 
 
@@ -67,12 +68,12 @@ void changeSize(GLsizei w, GLsizei h) {
  */
 
 void drawGame(int i) {
-    if(GAME->getMode() != Game::PAUSED) {
-    	GAME->updatePaddle();
-    	GAME->updateBall();
-        renderGame();
-        glutTimerFunc(TIMER_MSECS, drawGame, 1);
-    }
+    if (GAME->getMode() != Game::PAUSED) {
+   		GAME->updatePaddle();
+		GAME->updateBall();
+		renderGame();
+		glutTimerFunc(TIMER_MSECS, drawGame, 1);
+	}
 }
 
 void renderGame(void) {
@@ -164,9 +165,6 @@ void drawBricks() {
 				brick->getColor()->getB());
 
 		// set position
-	/*	glRectf(brick->getPos()->getX()+0.004, brick->getPos()->getY()+0.004,
-				brick->getPos()->getX() + brick->getW() - 0.004,
-				brick->getPos()->getY() + brick->getH() - 0.004);*/
 		glRectf(brick->getPos()->getX(), brick->getPos()->getY(),
 						brick->getPos()->getX() + brick->getW(),
 						brick->getPos()->getY() + brick->getH());
@@ -220,25 +218,124 @@ void drawScore() {
 		glVertex2f(0.28, 1);
 	glEnd();
 	glBegin(GL_LINES);
-		glVertex2f(0.0, SCORE_POSITION);
+		glVertex2f(0.000, SCORE_POSITION);
 		glVertex2f(COORD_RANGE, SCORE_POSITION);
 	glEnd();
 	glBegin(GL_LINES);
-		glVertex2f(0.001, SCORE_POSITION);
-		glVertex2f(0.001, 1);
+		glVertex2f(0.002, SCORE_POSITION);
+		glVertex2f(0.002, 1);
 	glEnd();
 	glBegin(GL_LINES);
-		glVertex2f(0.999, SCORE_POSITION);
-		glVertex2f(0.999, 1);
+		glVertex2f(0.998, SCORE_POSITION);
+		glVertex2f(0.998, 1);
 	glEnd();
 	glBegin(GL_LINES);
-		glVertex2f(0.0, 0.999);
-		glVertex2f(COORD_RANGE, 0.999);
+		glVertex2f(0.002, 0.998);
+		glVertex2f(COORD_RANGE, 0.998);
 	glEnd();
 	glBegin(GL_LINES);
-		glVertex2f(0.999, SCORE_POSITION);
-		glVertex2f(0.999, 1);
+		glVertex2f(0.998, SCORE_POSITION);
+		glVertex2f(0.998, 1);
 	glEnd();
+}
+
+void drawPaused() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+
+	drawPaddle();
+	drawBall();
+	drawBricks();
+	drawScore();
+
+	// draw
+	char buffer[100];
+	sprintf(buffer, "PAUSED");
+
+	// set color
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+		SCORE_DEFAULT_COLOR_B
+	);
+
+	// draw border
+	glBegin(GL_LINES);
+		glVertex2f(0.37, 0.447);
+		glVertex2f(0.37, 0.555);
+		glVertex2f(0.63, 0.447);
+		glVertex2f(0.63, 0.555);
+		glVertex2f(0.37, 0.45);
+		glVertex2f(0.63, 0.45);
+		glVertex2f(0.37, 0.55);
+		glVertex2f(0.63, 0.55);
+	glEnd();
+
+	glColor3f(0.0,0.0,0.0);
+	glRectf(0.3725, 0.453, 0.6275, 0.548);
+
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+			SCORE_DEFAULT_COLOR_B
+	);
+	drawText(0.435, 0.49, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	glPopMatrix();
+	glutSwapBuffers();
+}
+
+void drawStateInfo() {
+	float x, y, w, h, speed;
+	std::list<Brick *> *bricks = GAME->getBricks();
+	std::list<Brick *>::iterator itr;
+
+	GAME->updatePaddle();
+	GAME->updateBall();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+
+	drawPaddle();
+	drawBall();
+	drawBricks();
+	drawScore();
+
+	// set color
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+		SCORE_DEFAULT_COLOR_B
+	);
+
+	// draw
+	char buffer[100];
+
+	// draw attributes
+	x = GAME->getBall()->getPos()->getX();
+	y = GAME->getBall()->getPos()->getY();
+	speed = GAME->getBall()->getSpeed();
+	sprintf(buffer, "speed: %.3f", speed);
+	drawText(x+0.005, y+0.008, buffer, GLUT_BITMAP_HELVETICA_10);
+	sprintf(buffer, "x: %.3f, y: %.3f", x, y);
+	drawText(x, y-0.01, buffer, GLUT_BITMAP_HELVETICA_10);
+
+	x = GAME->getPaddle()->getPos()->getX();
+	y = GAME->getPaddle()->getPos()->getY();
+	w = GAME->getPaddle()->getW();
+	speed = GAME->getPaddle()->getSpeed();
+	sprintf(buffer, "speed: %.3f", speed);
+	drawText(x+0.007, y+0.038, buffer, GLUT_BITMAP_HELVETICA_10);
+	sprintf(buffer, "x: %.3f, y: %.3f", x, y);
+	drawText(x+0.002, y+0.02, buffer, GLUT_BITMAP_HELVETICA_10);
+
+	for (itr = bricks->begin(); itr != bricks->end(); itr++) {
+		Brick *brick = (*itr);
+		x = brick->getPos()->getX();
+		y = brick->getPos()->getY();
+		h = brick->getH();
+		sprintf(buffer, "x: %.2f", x);
+		drawText(x+0.001, y+h/2+0.001, buffer, GLUT_BITMAP_HELVETICA_10);
+		sprintf(buffer, "y: %.2f",y);
+		drawText(x+0.001, y+0.001, buffer, GLUT_BITMAP_HELVETICA_10);
+	}
+
+	glPopMatrix();
+	glutSwapBuffers();
 }
 
 void drawText(float x, float y, char *string, void *font)
@@ -261,7 +358,7 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		case 'R':
 		case 'r':
 			GAME->reset();
-			renderGame();
+			drawPaused();
 			LAST_MODE = Game::STARTING;
 			break;
 		case 'Q':
@@ -279,6 +376,9 @@ void processMouse(int button, int state, int x, int y) {
 				processMousePassiveMotion(x, y);
 				drawGame(0);
 			}
+			else {
+				drawPaused();
+			}
 		}
 		else if (button == GLUT_MIDDLE_BUTTON) {
 		}
@@ -289,7 +389,7 @@ void processMouse(int button, int state, int x, int y) {
 				GAME->setMode(Game::RUNNING);
 			}
 			processMousePassiveMotion(x, y);
-			drawGame(0);
+			drawStateInfo();
 			if(GAME->getMode() == Game::STARTING) {
 				LAST_MODE = Game::STARTING;
 			}

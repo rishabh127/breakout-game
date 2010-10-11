@@ -41,6 +41,8 @@ void processMouseEntry(int state);
 
 void drawScore();
 void drawText(float x, float y, char *string, void *font);
+void drawPaused();
+void drawStateInfo();
 
 
 #endif
