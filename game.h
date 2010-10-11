@@ -7,6 +7,10 @@
 
 #include <iostream>
 #include <list>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "brick.h"
 #include "paddle.h"
 #include "ball.h"
@@ -24,39 +28,51 @@
 #define TIMER_MSECS                 10
 #define COORD_RANGE                 1.0
 
-// game
-#define NUM_OF_LIFES                 3
+// game options
+#define NUM_OF_LIFES                 5
+#define NUM_OF_LEVELS				 10
 
 // paddle
-#define PADDLE_DEFAULT_WIDTH        0.12f
+#define PADDLE_DEFAULT_WIDTH        0.125f
 #define PADDLE_DEFAULT_HEIGHT       0.015f
 #define PADDLE_DEFAULT_COLOR_R      0.5f
 #define PADDLE_DEFAULT_COLOR_G      0.5f
 #define PADDLE_DEFAULT_COLOR_B      0.0f
-#define PADDLE_DEFAULT_POS_X        0.5
+#define PADDLE_DEFAULT_POS_X        0.5 - PADDLE_DEFAULT_WIDTH / 2
 #define PADDLE_DEFAULT_POS_Y        0.007
 #define PADDLE_POWER				0.035
 
 // ball
-#define BALL_DEFAULT_RADIUS        0.01f
+#define BALL_DEFAULT_RADIUS        0.012f
 #define BALL_DEFAULT_COLOR_R       0.0f
 #define BALL_DEFAULT_COLOR_G       0.0f
 #define BALL_DEFAULT_COLOR_B       1.0f
 #define BALL_DEFAULT_DIR_X         0.05
-#define BALL_DEFAULT_DIR_Y         0.5
+#define BALL_DEFAULT_DIR_Y         0.3
 #define BALL_DEFAULT_POS_X         PADDLE_DEFAULT_POS_X + PADDLE_DEFAULT_WIDTH/2
 #define BALL_DEFAULT_POS_Y         PADDLE_DEFAULT_POS_Y + PADDLE_DEFAULT_HEIGHT + BALL_DEFAULT_RADIUS + 0.001
 #define BALL_DEFAULT_SPEED		   0.02
 #define BALL_MIN_SPEED			   0.005
 
 // bricks
-//TODO
+#define BRICK1_COLOR_R      		  0.0f
+#define BRICK1_COLOR_G      		  0.0f
+#define BRICK1_COLOR_B      		  0.6f
+#define BRICK2_COLOR_R      		  0.0f
+#define BRICK2_COLOR_G      		  0.6f
+#define BRICK2_COLOR_B      		  0.0f
+#define BRICK3_COLOR_R      		  0.6f
+#define BRICK3_COLOR_G      		  0.0f
+#define BRICK3_COLOR_B      		  0.0f
+#define BRICK_SPACE				  	  0.007f
+#define BRICKS_TOP_POS_Y		  	  0.8f
+#define BRICKS_HEIGHT       		  0.03f
 
 // score
-#define SCORE_POSITION			   		 0.92f
-#define SCORE_LINE_DEFAULT_COLOR_R       1.0f
-#define SCORE_LINE_DEFAULT_COLOR_G       1.0f
-#define SCORE_LINE_DEFAULT_COLOR_B       1.0f
+#define SCORE_POSITION			   	0.92f
+#define SCORE_DEFAULT_COLOR_R       0.0f
+#define SCORE_DEFAULT_COLOR_G       1.0f
+#define SCORE_DEFAULT_COLOR_B       0.0f
 
 
 class Game
@@ -65,7 +81,8 @@ class Game
         
         enum GameMode {
             PAUSED,
-            RUNNING
+            RUNNING,
+            STARTING
         };
     
     private:
@@ -74,9 +91,13 @@ class Game
         Paddle *paddle;
         Ball *ball;
         std::list<Brick *> *bricks;
+        int bricksTotal;
 
-        bool isColliding;
+        bool newGame;
+        bool isCollidingPaddle;
         int life;
+        int score;
+        int level;
 
     public:
     
@@ -95,12 +116,18 @@ class Game
         Ball *getBall();
         void updateBall();
 
-        void generateBricks(int bricksPerLine, int numLines);
+        void generateBricks(int bricksPerLine, int numLines, float bricksHeight);
         void setBricks(std::list<Brick *> *bricks);
         std::list<Brick *> *getBricks();
+        int getTotalBricks();
+
+        int getLife();
+        int getScore();
+        int getLevel();
 
         void reset();
-
+        void lose();
+        void hit(std::list<Brick *>::iterator *bricksItr);
 };
 
 

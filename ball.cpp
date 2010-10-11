@@ -47,7 +47,7 @@ float Ball::getSpeed() {
 	return this->speed;
 }
 
-bool Ball::collide(Entity *e) {
+/*bool Ball::collide(Entity *e) {
 	float eX = e->getPos()->getX();
 	float eY = e->getPos()->getY();
 	float eW = e->getW();
@@ -80,3 +80,4 @@ bool Ball::collide(Entity *e) {
 	return true;
 }
 
+*/

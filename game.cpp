@@ -40,16 +40,15 @@ void Game::reset() {
 	ball->setSpeed(BALL_DEFAULT_SPEED);
 
 	// set bricks
-	generateBricks(10, 10);
+	generateBricks(6, 6, BRICKS_HEIGHT);
+	bricksTotal = bricks->size();
 
-	// set game mode
+	this->newGame = true;
 	this->mode = PAUSED;
-
-	// set colliding test
-	this->isColliding = false;
-
-	// set number of lifes
+	this->isCollidingPaddle = false;
 	this->life = NUM_OF_LIFES;
+	this->score = 0;
+	this->level = 1;
 }
 
 
@@ -72,9 +71,14 @@ Game::GameMode Game::getMode() {
 }
 
 Game::GameMode Game::swapMode() {
-	Game::GameMode newMode = (this->mode == PAUSED) ? RUNNING : PAUSED;
-	this->mode = newMode;
-	return newMode;
+	if(mode == PAUSED && newGame) {
+		newGame = false;
+		mode = STARTING;
+		return mode;
+	}
+	Game::GameMode newMode = (this->mode != RUNNING) ? RUNNING : PAUSED;
+	mode = newMode;
+	return mode;
 }
 
 
@@ -106,15 +110,22 @@ void Game::updatePaddle() {
 	paddle->getPos()->setX(xPos);
 
 	// check colision - ball
-	if (paddle->collide(ball)) {
-		if (!isColliding) {
+	if (ball->collide((Entity *)paddle)) {
+		if (!isCollidingPaddle) {
 			ball->getDir()->setY(
 				- ball->getDir()->getY()
 			);
-			isColliding = true;
+			isCollidingPaddle = true;
 		}
 	} else {
-		isColliding = false;
+		isCollidingPaddle = false;
+	}
+
+	// starting mode
+	if(mode == STARTING) {
+		ball->getPos()->setX(paddle->getPos()->getX() + paddle->getW() / 2);
+		ball->getPos()->setY(paddle->getPos()->getY() + paddle->getH()
+				+ ball->getRadius() + 0.001);
 	}
 }
 
@@ -132,6 +143,17 @@ Ball *Game::getBall() {
 }
 
 void Game::updateBall() {
+	bool collide;
+	std::list<Brick *>::iterator bricksItr;
+
+	// starting mode
+	if(mode == STARTING) {
+		ball->getPos()->setX(paddle->getPos()->getX() + paddle->getW() / 2);
+		ball->getPos()->setY(paddle->getPos()->getY() + paddle->getH()
+				+ ball->getRadius() + 0.001);
+		return;
+	}
+
 	// calculate ball position
 	float xDir =  this->ball->getDir()->getX();
 	float yDir = this->ball->getDir()->getY();
@@ -158,15 +180,12 @@ void Game::updateBall() {
 		ball->getDir()->setY(-yDir);
 	}
 	else if (yPos <= radius) {
-			printf("\nLOOSE\n");
-	//		yPos = -COORD_RANGE + radius;
-			ball->getDir()->setY(-yDir);
-			//TODO loose life
+		lose();
 	}
 
 	// check collision with paddle
-	if(ball->collide(this->paddle)) {
-		//if(!isColliding) {
+	if(ball->collide((Entity *)paddle)) {
+		if(!isCollidingPaddle) {
 			ball->getDir()->setY(-yDir);
 			ball->getDir()->setX( ( (ball->getPos()->getX() - (paddle->getPos()->getX()
 					+ paddle->getW()/2) ) / paddle->getW() ) );
@@ -174,34 +193,34 @@ void Game::updateBall() {
 			if(ball->getSpeed() < BALL_MIN_SPEED) {
 				ball->setSpeed(BALL_MIN_SPEED);
 			}
-//			isColliding = true;
-//		}
-//		return;
+			isCollidingPaddle = true;
+		}
+	}
+	else {
+		isCollidingPaddle = true;
 	}
 
 	// check collision if bricks
-//	if (ball->collide(*bricks->begin())) {
-//		if (!isColliding) {
-//			ball->getDir()->setY(-yDir);
-			//ball->getDir()->setX(-xDir);
-//			isColliding = true;
-//		}
+	collide = false;
+	for(bricksItr = bricks->begin(); bricksItr != bricks->end(); bricksItr++) {
+		if (ball->collide(*bricksItr)) {
+			ball->getDir()->setY(-yDir);
+			collide = true;
+			break;
+		}
+	}
+	if(collide) {
+		hit(&bricksItr);
 	}
 
-//	else {
-//		isColliding = false;
-//	}
-
-//}
+//	printf("BALLANG = %f \n", atan2(ball->getPos()->getY()-lastBallY,
+//								ball->getPos()->getX()-lastBallX) * 180 / PI);
+}
 
 
 /*
  * bricks
  */
-
-//TODO brickGenerator() -> funcao que recebe uma quantidade de
-// bricks, numero de linhas e preenche a lista de brick
-// checar maxBricklines e maxNumBricks
 
 void Game::setBricks(std::list<Brick *> *bricks) {
 	this->bricks = bricks;
@@ -211,34 +230,102 @@ std::list<Brick *> *Game::getBricks() {
 	return this->bricks;
 }
 
-void Game::generateBricks(int bricksPerLine, int numLines) {
-	// sort life
-	int breakLife = 3; //TODO sort life
+void Game::generateBricks(int bricksPerLine, int numLines, float bricksHeight) {
+	float brickW;
+	float brickPosX = BRICK_SPACE;
+	float brickPosY = BRICKS_TOP_POS_Y;
 
-	// set brick
-	Brick *brick = new Brick(breakLife, 0.04, 0.04, new Color(0, 0.0, 1.0*life/10));
-	brick->setH(0.04);
-	brick->setW(0.1);
-	brick->setPos(0.5, 0.5);
-	this->bricks->push_back(brick);
+	bricks->clear();
+	brickW = ((float)COORD_RANGE-BRICK_SPACE)/(float)bricksPerLine;
+	for(int l=1; l<=numLines; l++) {
+		for(int i=0; i<bricksPerLine; i++) {
+			// random life
+			srand(time(NULL)*l*i);
+			int brickLife = (rand()%3) + 1;
 
-	int life = 6; //TODO sort life
-	brick = new Brick(breakLife, 0.04, 0.04, new Color(0, 0.0, 1.0*life/10.0));
-	brick->setH(0.04);
-	brick->setW(0.1);
-	brick->setPos(0.546, 0.536);
-	this->bricks->push_back(brick);
-
-	life = 6; //TODO sort life
-	brick = new Brick(breakLife, 0.04, 0.04, new Color(0, 0.0, 1.0*life/10.0));
-	brick->setH(0.04);
-	brick->setW(0.1);
-	brick->setPos(0.45, 0.536);
-	this->bricks->push_back(brick);
+			Color *brickColor = NULL;
+			switch(brickLife) {
+			case 1:
+				brickColor = new Color(BRICK1_COLOR_R, BRICK1_COLOR_G, BRICK1_COLOR_B);
+				break;
+			case 2:
+				brickColor = new Color(BRICK2_COLOR_R, BRICK2_COLOR_G, BRICK2_COLOR_B);
+				break;
+			case 3:
+				brickColor = new Color(BRICK3_COLOR_R, BRICK3_COLOR_G, BRICK3_COLOR_B);
+				break;
+			}
+			// set brick
+			Brick *brick = new Brick(brickLife, brickW-BRICK_SPACE, bricksHeight, brickColor);
+			brick->setPos(brickPosX, brickPosY);
+			this->bricks->push_back(brick);
+			brickPosX += brickW;
+		}
+		brickPosY -= (bricksHeight + BRICK_SPACE);
+		if(l%2) {
+			bricksPerLine--;
+			brickPosX = BRICK_SPACE + brickW/2;
+		}
+		else {
+			bricksPerLine++;
+			brickPosX = BRICK_SPACE;
+		}
+	}
 }
 
+int Game::getTotalBricks() {
+	return this->bricksTotal;
+}
+
+
 /*
- * game options
+ * level
  */
 
+int Game::getLife() {
+	return this->life;
+}
 
+int Game::getScore() {
+	return this->score;
+}
+
+int Game::getLevel() {
+	return this->level;
+}
+
+
+/*
+ * game states
+ */
+
+void Game::lose() {
+	life--;
+	if(life > 0) {
+		mode = STARTING;
+	}
+	else {
+		// TODO imprimir game-over
+	}
+}
+
+void Game::hit(std::list<Brick *>::iterator *bricksItr) {
+	Brick *brick = *(*bricksItr);
+	brick->decLife();
+
+	switch (brick->getLife()) {
+	case 1:
+		brick->getColor()->setRGB(BRICK1_COLOR_R, BRICK1_COLOR_G, BRICK1_COLOR_B);
+		break;
+	case 2:
+		brick->getColor()->setRGB(BRICK2_COLOR_R, BRICK2_COLOR_G, BRICK2_COLOR_B);
+		break;
+	case 3:
+		brick->getColor()->setRGB(BRICK3_COLOR_R, BRICK3_COLOR_G, BRICK3_COLOR_B);
+		break;
+	default:
+		bricks->erase(*bricksItr);
+		score++;
+		//TODO - verifica se subiu de level ou zerou jogo
+	}
+}

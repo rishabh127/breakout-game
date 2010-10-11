@@ -47,12 +47,11 @@ void init(void) {
     GAME = new Game();
     WINDOW_WIDTH = WINDOW_INIT_WIDTH;
     WINDOW_HEIGHT = WINDOW_INIT_HEIGHT;
+    LAST_MODE = Game::STARTING;
 }
 
 
 void changeSize(GLsizei w, GLsizei h) {
-	float windowHeight, windowWidth;
-
 	if (h == 0) {
 		h = 1;
 	}
@@ -161,38 +160,97 @@ void drawBricks() {
 		Brick *brick = (*itr);
 
 		// set color
-		//glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
-		//		brick->getColor()->getB());
-
-
-		// set position
-		glColor3f(0.6,0.42,0.21);
-		glRectf(brick->getPos()->getX(), brick->getPos()->getY(),
-			brick->getPos()->getX() + brick->getW(),
-			brick->getPos()->getY() + brick->getH());
+		glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
+				brick->getColor()->getB());
 
 		// set position
-		glColor3f(0.5,0.0,0.0);
-		glRectf(brick->getPos()->getX()+0.004, brick->getPos()->getY()+0.004,
+	/*	glRectf(brick->getPos()->getX()+0.004, brick->getPos()->getY()+0.004,
 				brick->getPos()->getX() + brick->getW() - 0.004,
-				brick->getPos()->getY() + brick->getH() - 0.004);
+				brick->getPos()->getY() + brick->getH() - 0.004);*/
+		glRectf(brick->getPos()->getX(), brick->getPos()->getY(),
+						brick->getPos()->getX() + brick->getW(),
+						brick->getPos()->getY() + brick->getH());
 	}
 }
 
 void drawScore() {
+	char buffer[100];
+	float originX, originY;
+	float vectorX1, vectorY1;
+	float radius;
 
-	// set line color
-	glColor3f(SCORE_LINE_DEFAULT_COLOR_R,
-			  SCORE_LINE_DEFAULT_COLOR_G,
-			  SCORE_LINE_DEFAULT_COLOR_B
+	// set score color
+	glColor3f(SCORE_DEFAULT_COLOR_R,
+			  SCORE_DEFAULT_COLOR_G,
+			  SCORE_DEFAULT_COLOR_B
 	);
 
-	// draw line
+	// draw informations
+	sprintf(buffer, "BREAKOUT");
+	drawText(0.05,0.947, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "LEVEL: %.2d/%.2d", GAME->getLevel(), NUM_OF_LEVELS);
+	drawText(0.33,0.95, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "SCORE: %.2d/%.2d", GAME->getScore(), GAME->getTotalBricks());
+	drawText(0.53,0.95, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "LIFES: ");
+	drawText(0.74,0.95, buffer, GLUT_BITMAP_9_BY_15);
+	radius = 0.009;
+	originX = 0.81;
+	originY = 0.957;
+	for(int i=0; i<GAME->getLife(); i++) {
+		originX += 0.025;
+		vectorX1 = originX, vectorY1 = originY;
+		glBegin(GL_TRIANGLES);
+			for (int i = 0; i <= NUM_TRIANGLES_IN_CIRCLE; i++) {
+				float angle = (float) (((double) i) / TRIANGLE_ANGLE_IN_CIRCLE);
+				float vectorX = originX + (radius * (float) sin((double) angle));
+				float vectorY = originY + (radius * (float) cos((double) angle));
+				glVertex2d(originX, originY);
+				glVertex2d(vectorX1, vectorY1);
+				glVertex2d(vectorX, vectorY);
+				vectorY1 = vectorY;
+				vectorX1 = vectorX;
+			}
+		glEnd();
+	}
+
+	// draw lines
+	glBegin(GL_LINES);
+		glVertex2f(0.28, SCORE_POSITION);
+		glVertex2f(0.28, 1);
+	glEnd();
 	glBegin(GL_LINES);
 		glVertex2f(0.0, SCORE_POSITION);
 		glVertex2f(COORD_RANGE, SCORE_POSITION);
 	glEnd();
+	glBegin(GL_LINES);
+		glVertex2f(0.001, SCORE_POSITION);
+		glVertex2f(0.001, 1);
+	glEnd();
+	glBegin(GL_LINES);
+		glVertex2f(0.999, SCORE_POSITION);
+		glVertex2f(0.999, 1);
+	glEnd();
+	glBegin(GL_LINES);
+		glVertex2f(0.0, 0.999);
+		glVertex2f(COORD_RANGE, 0.999);
+	glEnd();
+	glBegin(GL_LINES);
+		glVertex2f(0.999, SCORE_POSITION);
+		glVertex2f(0.999, 1);
+	glEnd();
 }
+
+void drawText(float x, float y, char *string, void *font)
+{
+  int len, i;
+  glRasterPos2f(x, y);
+  len = (int) strlen(string);
+  for (i = 0; i < len; i++) {
+    glutBitmapCharacter(font, string[i]);
+  }
+}
+
 
 /**
  *	input process
@@ -204,35 +262,37 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		case 'r':
 			GAME->reset();
 			renderGame();
-			GAME->setMode(Game::PAUSED);
+			LAST_MODE = Game::STARTING;
 			break;
 		case 'Q':
 		case 'q':
 			exit(0);
 	}
-	//drawGame(0);
-	//TODO olhar porq outras teclas aceleram
 }
 
 void processMouse(int button, int state, int x, int y) {
 	if(state == GLUT_DOWN) {
 		if (button == GLUT_LEFT_BUTTON) {
-			printf("[ INFO ] left mouse button pressed\n");
-			GAME->swapMode();
-			if(GAME->getMode() == Game::RUNNING) {
+			LAST_MODE = GAME->swapMode();
+			if(GAME->getMode() == Game::RUNNING
+					|| GAME->getMode() == Game::STARTING) {
 				processMousePassiveMotion(x, y);
 				drawGame(0);
 			}
 		}
 		else if (button == GLUT_MIDDLE_BUTTON) {
-			printf("[ INFO ] middle mouse button pressed\n");
 		}
 		else {
-			printf("[ INFO ] right mouse button pressed\n");
 			//TODO print info
-			GAME->setMode(Game::RUNNING);
+			GAME->setMode(LAST_MODE);
+			if(LAST_MODE == Game::PAUSED) {
+				GAME->setMode(Game::RUNNING);
+			}
 			processMousePassiveMotion(x, y);
 			drawGame(0);
+			if(GAME->getMode() == Game::STARTING) {
+				LAST_MODE = Game::STARTING;
+			}
 			GAME->setMode(Game::PAUSED);
 		}
 	}
@@ -251,7 +311,6 @@ void processMousePassiveMotion(int x, int y) {
 		// update paddle color
 		GAME->getPaddle()->getColor()->setR(1.0 - mouseLoc);
 		GAME->getPaddle()->getColor()->setG(mouseLoc);
-		//printf("COLORS -> R: %f, G: %f\n", 1.0-mouseLoc, mouseLoc);
 	}
 }
 

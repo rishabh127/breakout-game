@@ -15,10 +15,11 @@ class Brick : public Entity
     
   public:
     
-    Brick(int life, int w, int h, Color *c);
+    Brick(int life, float w, float h, Color *c);
 
     void setLife(int life);
     int getLife();
+    void decLife();
 
 };
 

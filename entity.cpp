@@ -71,6 +71,5 @@ bool Entity::collide(Entity *e) {
 			collide = true;
 		}
 	}
-	if(collide)printf("\nLOL");
 	return collide;
 }

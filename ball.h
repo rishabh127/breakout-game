@@ -32,7 +32,7 @@ class Ball : public Entity
     void incSpeed(float inc);
     float getSpeed();
 
-    bool collide(Entity *e);
+ //   bool collide(Entity *e);
 
 };
 

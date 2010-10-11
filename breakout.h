@@ -21,7 +21,7 @@ Game *GAME;
 GLsizei WINDOW_WIDTH;
 GLsizei WINDOW_HEIGHT;
 bool MOUSE_IN = true;
-
+Game::GameMode LAST_MODE;
 
 // prototypes
 int main(int argc, char** argv);
@@ -40,6 +40,7 @@ void processMousePassiveMotion(int x, int y);
 void processMouseEntry(int state);
 
 void drawScore();
+void drawText(float x, float y, char *string, void *font);
 
 
 #endif

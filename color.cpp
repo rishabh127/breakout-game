@@ -14,6 +14,12 @@ Color::Color(float r, float g, float b) {
     this->b = b;
 }
 
+void Color::setRGB(float r, float g, float b) {
+	this->r = r;
+	this->g = g;
+	this->b = b;
+}
+
 void Color::setR(float r) {
     this->r = r;
 }
