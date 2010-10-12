@@ -31,6 +31,7 @@
 // game options
 #define NUM_OF_LIFES                 5
 #define NUM_OF_LEVELS				 10
+#define INITIAL_NUM_BRICKS			 4
 
 // paddle
 #define PADDLE_DEFAULT_WIDTH        0.125f
@@ -82,7 +83,10 @@ class Game
         enum GameMode {
             PAUSED,
             RUNNING,
-            STARTING
+            STARTING,
+            GAME_OVER,
+            WIN,
+            FINISHED
         };
     
     private:
@@ -92,11 +96,13 @@ class Game
         Ball *ball;
         std::list<Brick *> *bricks;
         int bricksTotal;
+        unsigned long timer;
 
         bool newGame;
         bool isCollidingPaddle;
         int life;
         int score;
+        int totalScore;
         int level;
 
     public:
@@ -123,9 +129,13 @@ class Game
 
         int getLife();
         int getScore();
+        int getTotalScore();
         int getLevel();
+        unsigned long getTimer();
+        void addTimer(int t);
 
         void reset();
+        void newLevel();
         void lose();
         void hit(std::list<Brick *>::iterator *bricksItr);
 };

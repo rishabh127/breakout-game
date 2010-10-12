@@ -68,10 +68,24 @@ void changeSize(GLsizei w, GLsizei h) {
  */
 
 void drawGame(int i) {
-    if (GAME->getMode() != Game::PAUSED) {
-   		GAME->updatePaddle();
+	switch(GAME->getMode()) {
+	case Game::GAME_OVER:
+		drawGameOver();
+		break;
+	case Game::PAUSED:
+		break;
+	case Game::WIN:
+		// TODO - verifica se subiu de level ou se zerou
+		drawWin();
+		break;
+	case Game::FINISHED :
+		drawFinish();
+		break;
+	default:
+		GAME->updatePaddle();
 		GAME->updateBall();
 		renderGame();
+		GAME->addTimer(TIMER_MSECS);
 		glutTimerFunc(TIMER_MSECS, drawGame, 1);
 	}
 }
@@ -338,14 +352,132 @@ void drawStateInfo() {
 	glutSwapBuffers();
 }
 
+void drawGameOver() {
+	char buffer[100];
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+
+	drawPaddle();
+	drawBall();
+	drawBricks();
+	drawScore();
+
+	// set color
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+		SCORE_DEFAULT_COLOR_B
+	);
+
+	// draw border
+	glBegin(GL_LINES);
+		glVertex2f(0.35, 0.416);
+		glVertex2f(0.35, 0.555);
+		glVertex2f(0.65, 0.416);
+		glVertex2f(0.65, 0.555);
+		glVertex2f(0.35, 0.42);
+		glVertex2f(0.65, 0.42);
+		glVertex2f(0.35, 0.55);
+		glVertex2f(0.65, 0.55);
+	glEnd();
+
+	glColor3f(0.0,0.0,0.0);
+	glRectf(0.3525, 0.424, 0.6465, 0.5475);
+
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+			SCORE_DEFAULT_COLOR_B
+	);
+	sprintf(buffer, "GAME OVER");
+	drawText(0.398, 0.5, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "TOTAL SCORE: %.3d", GAME->getTotalScore());
+	drawText(0.4, 0.47, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "PRESS \"r\" TO RESTART");
+	drawText(0.378, 0.445, buffer, GLUT_BITMAP_9_BY_15);
+
+	glPopMatrix();
+	glutSwapBuffers();
+}
+
+void drawWin() {
+	char buffer[100];
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+
+	drawScore();
+
+	// set color
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+			SCORE_DEFAULT_COLOR_B
+	);
+
+	// draw border
+	glBegin(GL_LINES);
+		glVertex2f(0.35, 0.416);
+		glVertex2f(0.35, 0.555);
+		glVertex2f(0.65, 0.416);
+		glVertex2f(0.65, 0.555);
+		glVertex2f(0.35, 0.42);
+		glVertex2f(0.65, 0.42);
+		glVertex2f(0.35, 0.55);
+		glVertex2f(0.65, 0.55);
+	glEnd();
+
+	glColor3f(0.0, 0.0, 0.0);
+	glRectf(0.3525, 0.424, 0.6465, 0.5475);
+
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+		SCORE_DEFAULT_COLOR_B
+	);
+	sprintf(buffer, "LEVEL UP!");
+	drawText(0.415, 0.49, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "CLICK TO CONTINUE");
+	drawText(0.393, 0.45, buffer, GLUT_BITMAP_9_BY_15);
+
+	glPopMatrix();
+	glutSwapBuffers();
+}
+
+void drawFinish() {
+	char buffer[100];
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+
+	drawScore();
+
+	// set color
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+		SCORE_DEFAULT_COLOR_B
+	);
+
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+			SCORE_DEFAULT_COLOR_B
+	);
+	sprintf(buffer, "CONGRATULATIONS !!!");
+	drawText(0.32, 0.7, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "YOU SPENT %ld MINUTES (%lds) OF YOUR LIFE", GAME->getTimer()/60000, GAME->getTimer()/1000);
+	drawText(0.27, 0.63, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "PRESS \"r\" TO SPEND MORE");
+	drawText(0.36, 0.57, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "TOTAL SCORE: %.3d", GAME->getTotalScore());
+	drawText(0.4, 0.5, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "CREDITS");
+	drawText(0.429, 0.35, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "Lucas Cunha de Oliveira Miranda");
+	drawText(0.319, 0.28, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "lucmir@dcc.ufmg.br");
+	drawText(0.393, 0.23, buffer, GLUT_BITMAP_9_BY_15);
+
+	glPopMatrix();
+	glutSwapBuffers();
+}
+
+
 void drawText(float x, float y, char *string, void *font)
 {
-  int len, i;
-  glRasterPos2f(x, y);
-  len = (int) strlen(string);
-  for (i = 0; i < len; i++) {
-    glutBitmapCharacter(font, string[i]);
-  }
+	int len, i;
+	glRasterPos2f(x, y);
+	len = (int) strlen(string);
+	for (i = 0; i < len; i++) {
+		glutBitmapCharacter(font, string[i]);
+	}
 }
 
 
@@ -355,45 +487,91 @@ void drawText(float x, float y, char *string, void *font)
 
 void processNormalKeys(unsigned char key, int x, int y) {
 	switch(key) {
+		case 'Q':
+		case 'q':
+			exit(0);
+		case 'L':
+		case 'l':
+			CHEAT[0] = true;
+			break;
+		case 'U':
+		case 'u':
+			if(CHEAT[0]) {
+				CHEAT[1] = true;
+			}
+			break;
+		case 'C':
+		case 'c':
+			if(CHEAT[1]) {
+				CHEAT[2] = true;
+			}
+			break;
+		case 'A':
+		case 'a':
+			if(CHEAT[2]) {
+				CHEAT[3] = true;
+			}
+			break;
+		case 'S':
+		case 's':
+			if(CHEAT[3]) {
+				GAME->setMode(Game::FINISHED);
+				drawFinish();
+			}
+		break;
 		case 'R':
 		case 'r':
 			GAME->reset();
 			drawPaused();
 			LAST_MODE = Game::STARTING;
-			break;
-		case 'Q':
-		case 'q':
-			exit(0);
+		default:
+			for(int i=0; i<4; i++) {
+				CHEAT[i] = false;
+			}
 	}
 }
 
 void processMouse(int button, int state, int x, int y) {
 	if(state == GLUT_DOWN) {
 		if (button == GLUT_LEFT_BUTTON) {
-			LAST_MODE = GAME->swapMode();
-			if(GAME->getMode() == Game::RUNNING
-					|| GAME->getMode() == Game::STARTING) {
-				processMousePassiveMotion(x, y);
-				drawGame(0);
+			if(GAME->getMode() == Game::WIN) {
+				if(GAME->getLevel() < NUM_OF_LEVELS) {
+					GAME->newLevel();
+				}
+				else {
+					GAME->setMode(Game::FINISHED);
+				}
 			}
-			else {
-				drawPaused();
+			if(GAME->getMode() != Game::GAME_OVER
+					&& GAME->getMode() != Game::FINISHED) {
+				LAST_MODE = GAME->swapMode();
+				if(GAME->getMode() == Game::RUNNING
+						|| GAME->getMode() == Game::STARTING) {
+					processMousePassiveMotion(x, y);
+					drawGame(0);
+				}
+				else {
+					drawPaused();
+				}
 			}
 		}
 		else if (button == GLUT_MIDDLE_BUTTON) {
 		}
 		else {
-			//TODO print info
-			GAME->setMode(LAST_MODE);
-			if(LAST_MODE == Game::PAUSED) {
-				GAME->setMode(Game::RUNNING);
+			if(GAME->getMode() != Game::GAME_OVER
+					&& GAME->getMode() != Game::WIN
+					&& GAME->getMode() != Game::FINISHED) {
+				GAME->setMode(LAST_MODE);
+				if(LAST_MODE == Game::PAUSED) {
+					GAME->setMode(Game::RUNNING);
+				}
+				processMousePassiveMotion(x, y);
+				drawStateInfo();
+				if(GAME->getMode() == Game::STARTING) {
+					LAST_MODE = Game::STARTING;
+				}
+				GAME->setMode(Game::PAUSED);
 			}
-			processMousePassiveMotion(x, y);
-			drawStateInfo();
-			if(GAME->getMode() == Game::STARTING) {
-				LAST_MODE = Game::STARTING;
-			}
-			GAME->setMode(Game::PAUSED);
 		}
 	}
 }

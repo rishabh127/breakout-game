@@ -22,6 +22,7 @@ GLsizei WINDOW_WIDTH;
 GLsizei WINDOW_HEIGHT;
 bool MOUSE_IN = true;
 Game::GameMode LAST_MODE;
+bool CHEAT[4];
 
 // prototypes
 int main(int argc, char** argv);
@@ -43,6 +44,8 @@ void drawScore();
 void drawText(float x, float y, char *string, void *font);
 void drawPaused();
 void drawStateInfo();
-
+void drawGameOver();
+void drawWin();
+void drawFinish();
 
 #endif

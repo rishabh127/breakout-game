@@ -22,7 +22,17 @@ Game::Game() {
 }
 
 void Game::reset() {
-    // set paddle
+	this->life = NUM_OF_LIFES;
+	this->level = 0;
+	this->totalScore = 0;
+	this->timer = 0;
+	newLevel();
+}
+
+void Game::newLevel() {
+	level++;
+
+	// set paddle
 	paddle->setW(PADDLE_DEFAULT_WIDTH);
 	paddle->setH(PADDLE_DEFAULT_HEIGHT);
 	paddle->getColor()->setR(PADDLE_DEFAULT_COLOR_R);
@@ -40,17 +50,16 @@ void Game::reset() {
 	ball->setSpeed(BALL_DEFAULT_SPEED);
 
 	// set bricks
-	generateBricks(5, 5, BRICKS_HEIGHT);
+	generateBricks(INITIAL_NUM_BRICKS + level-1,
+		INITIAL_NUM_BRICKS + level-1, BRICKS_HEIGHT);
+
 	bricksTotal = bricks->size();
 
 	this->newGame = true;
 	this->mode = PAUSED;
 	this->isCollidingPaddle = false;
-	this->life = NUM_OF_LIFES;
 	this->score = 0;
-	this->level = 1;
 }
-
 
 Game::~Game() {
     delete this->paddle;
@@ -212,9 +221,6 @@ void Game::updateBall() {
 	if(collide) {
 		hit(&bricksItr);
 	}
-
-//	printf("BALLANG = %f \n", atan2(ball->getPos()->getY()-lastBallY,
-//								ball->getPos()->getX()-lastBallX) * 180 / PI);
 }
 
 
@@ -238,7 +244,7 @@ void Game::generateBricks(int bricksPerLine, int numLines, float bricksHeight) {
 	bricks->clear();
 	brickW = ((float)COORD_RANGE-BRICK_SPACE)/(float)bricksPerLine;
 	for(int l=1; l<=numLines; l++) {
-		for(int i=0; i<bricksPerLine; i++) {
+		for(int i=1; i<=bricksPerLine; i++) {
 			// random life
 			srand(time(NULL)*l*i);
 			int brickLife = (rand()%3) + 1;
@@ -279,7 +285,7 @@ int Game::getTotalBricks() {
 
 
 /*
- * level
+ * game status
  */
 
 int Game::getLife() {
@@ -290,8 +296,20 @@ int Game::getScore() {
 	return this->score;
 }
 
+int Game::getTotalScore() {
+	return this->totalScore;
+}
+
 int Game::getLevel() {
 	return this->level;
+}
+
+unsigned long Game::getTimer() {
+	return this->timer;
+}
+
+void Game::addTimer(int t) {
+	timer += t;
 }
 
 
@@ -305,7 +323,7 @@ void Game::lose() {
 		mode = STARTING;
 	}
 	else {
-		// TODO imprimir game-over
+		mode = GAME_OVER;
 	}
 }
 
@@ -326,6 +344,15 @@ void Game::hit(std::list<Brick *>::iterator *bricksItr) {
 	default:
 		bricks->erase(*bricksItr);
 		score++;
-		//TODO - verifica se subiu de level ou zerou jogo
+		totalScore++;
+		// level up
+		if(score == bricksTotal) {
+			if(level == NUM_OF_LEVELS) {
+				mode = FINISHED;
+			}
+			else {
+				mode = WIN;
+			}
+		}
 	}
 }
