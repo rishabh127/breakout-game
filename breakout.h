@@ -43,6 +43,8 @@ void drawPaddle();
 void drawBall();
 void drawBricks();
 
+void loadMenu();
+void menuHandler(int op);
 void processNormalKeys(unsigned char key, int x, int y);
 void processMouse(int button, int state, int x, int y);
 void processMousePassiveMotion(int x, int y);

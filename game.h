@@ -35,7 +35,7 @@
 
 // paddle
 #define PADDLE_DEFAULT_WIDTH        0.135f
-#define PADDLE_DEFAULT_HEIGHT       0.018f
+#define PADDLE_DEFAULT_HEIGHT       0.019f
 #define PADDLE_DEFAULT_COLOR_R      0.5f
 #define PADDLE_DEFAULT_COLOR_G      0.5f
 #define PADDLE_DEFAULT_COLOR_B      0.0f
@@ -58,16 +58,22 @@
 // bricks
 #define BRICK1_COLOR_R      		  0.0f
 #define BRICK1_COLOR_G      		  0.0f
-#define BRICK1_COLOR_B      		  0.6f
+#define BRICK1_COLOR_B      		  0.8f
 #define BRICK2_COLOR_R      		  0.0f
-#define BRICK2_COLOR_G      		  0.6f
+#define BRICK2_COLOR_G      		  0.8f
 #define BRICK2_COLOR_B      		  0.0f
-#define BRICK3_COLOR_R      		  0.6f
+#define BRICK3_COLOR_R      		  0.8f
 #define BRICK3_COLOR_G      		  0.0f
 #define BRICK3_COLOR_B      		  0.0f
+#define BRICK4_COLOR_R      		  0.5f
+#define BRICK4_COLOR_G      		  0.5f
+#define BRICK4_COLOR_B      		  0.5f
 #define BRICK_SPACE				  	  0.007f
 #define BRICKS_TOP_POS_Y		  	  0.8f
 #define BRICKS_HEIGHT       		  0.03f
+#define BRICKS_INDESTR_PROB			  10
+#define BRICKS_INDESTR_CODE			  -99
+#define BRICKS_RED_PROB_INC			  2
 
 // score
 #define SCORE_POSITION			   	0.92f
@@ -131,6 +137,7 @@ class Game
         int getScore();
         int getTotalScore();
         int getLevel();
+        void setLevel(int level);
         unsigned long getTimer();
         void addTimer(int t);
 

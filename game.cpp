@@ -53,8 +53,6 @@ void Game::newLevel() {
 	generateBricks(INITIAL_NUM_BRICKS + level-1,
 		INITIAL_NUM_BRICKS + level-1, BRICKS_HEIGHT);
 
-	bricksTotal = bricks->size();
-
 	this->newGame = true;
 	this->mode = PAUSED;
 	this->isCollidingPaddle = false;
@@ -240,14 +238,38 @@ void Game::generateBricks(int bricksPerLine, int numLines, float bricksHeight) {
 	float brickW;
 	float brickPosX = BRICK_SPACE;
 	float brickPosY = BRICKS_TOP_POS_Y;
+	bool indestruct = true;
 
+	bricksTotal = 0;
 	bricks->clear();
 	brickW = ((float)COORD_RANGE-BRICK_SPACE)/(float)bricksPerLine;
 	for(int l=1; l<=numLines; l++) {
 		for(int i=1; i<=bricksPerLine; i++) {
-			// random life
+			// sort - indestructible brick
 			srand(time(NULL)*l*i);
-			int brickLife = (rand()%3) + 1;
+			int brickLife = (rand()%100);
+			if(brickLife < BRICKS_INDESTR_PROB && indestruct) {
+				brickLife = BRICKS_INDESTR_CODE;
+				indestruct = false; // avoid indestructible bricks together
+			}
+			else {
+				indestruct = true;
+			}
+
+			if(brickLife != BRICKS_INDESTR_CODE) {
+				// random life
+				srand(time(NULL)*l*i);
+				brickLife = (rand()%100) + 1 + level*BRICKS_RED_PROB_INC;
+				if(brickLife <= 33) {
+					brickLife = 1;
+				}
+				else if(brickLife <= 66) {
+					brickLife = 2;
+				}
+				else {
+					brickLife = 3;
+				}
+			}
 
 			Color *brickColor = NULL;
 			switch(brickLife) {
@@ -260,11 +282,17 @@ void Game::generateBricks(int bricksPerLine, int numLines, float bricksHeight) {
 			case 3:
 				brickColor = new Color(BRICK3_COLOR_R, BRICK3_COLOR_G, BRICK3_COLOR_B);
 				break;
+			case BRICKS_INDESTR_CODE:
+				brickColor = new Color(BRICK4_COLOR_R, BRICK4_COLOR_G, BRICK4_COLOR_B);
+				break;
 			}
 			// set brick
 			Brick *brick = new Brick(brickLife, brickW-BRICK_SPACE, bricksHeight, brickColor);
 			brick->setPos(brickPosX, brickPosY);
 			this->bricks->push_back(brick);
+			if(brickLife != BRICKS_INDESTR_CODE) {
+				bricksTotal++;
+			}
 			brickPosX += brickW;
 		}
 		brickPosY -= (bricksHeight + BRICK_SPACE);
@@ -304,6 +332,10 @@ int Game::getLevel() {
 	return this->level;
 }
 
+void Game::setLevel(int level) {
+	this->level = level;
+}
+
 unsigned long Game::getTimer() {
 	return this->timer;
 }
@@ -329,6 +361,11 @@ void Game::lose() {
 
 void Game::hit(std::list<Brick *>::iterator *bricksItr) {
 	Brick *brick = *(*bricksItr);
+
+	if(brick->getLife() == BRICKS_INDESTR_CODE) {
+		return;	// indestructible brick
+	}
+
 	brick->decLife();
 
 	switch (brick->getLife()) {

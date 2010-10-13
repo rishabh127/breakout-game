@@ -51,6 +51,8 @@ void init(void) {
     LAST_MODE = Game::STARTING;
 	glLineWidth(8.0);
 
+	loadMenu();
+
 	// load textures
 	BACKGROUND[0] = new GLTexture("images/space01.png");
 	BACKGROUND[1] = new GLTexture("images/space02.png");
@@ -537,6 +539,32 @@ void drawText(float x, float y, char *string, void *font)
 	}
 }
 
+/**
+ * levels menu
+ */
+
+void loadMenu() {
+	glutCreateMenu(menuHandler);
+	glutAddMenuEntry("LEVEL 1", 0);
+	glutAddMenuEntry("LEVEL 2", 1);
+	glutAddMenuEntry("LEVEL 3", 2);
+	glutAddMenuEntry("LEVEL 4", 3);
+	glutAddMenuEntry("LEVEL 5", 4);
+	glutAddMenuEntry("LEVEL 6", 5);
+	glutAddMenuEntry("LEVEL 7", 6);
+	glutAddMenuEntry("LEVEL 8", 7);
+	glutAddMenuEntry("LEVEL 9", 8);
+	glutAddMenuEntry("LEVEL 10", 9);
+	glutAttachMenu(GLUT_MIDDLE_BUTTON);
+}
+
+void menuHandler(int op) {
+	GAME->setLevel(op);
+	GAME->newLevel();
+	GAME->setMode(Game::STARTING);
+}
+
+
 
 /**
  *	input process
@@ -578,9 +606,13 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		break;
 		case 'R':
 		case 'r':
+			for (int i = 0; i < 4; i++) {
+				CHEAT[i] = false;
+			}
 			GAME->reset();
 			drawPaused();
 			LAST_MODE = Game::STARTING;
+			break;
 		default:
 			for(int i=0; i<4; i++) {
 				CHEAT[i] = false;
