@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
     // openGL initialization
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
 
-    // window configuration
+	// window configuration
     glutInitWindowPosition(WINDOW_INIT_POSITION_X, WINDOW_INIT_POSITION_Y);
     glutInitWindowSize(WINDOW_INIT_WIDTH, WINDOW_INIT_HEIGHT);
     glutInit(&argc, argv);
@@ -39,16 +39,30 @@ void init(void) {
     glClearColor(WINDOW_DEFAULT_COLOR_R,
 				 WINDOW_DEFAULT_COLOR_G,
 				 WINDOW_DEFAULT_COLOR_B,
-				 1.0f
+				 0.0f
 	);
-    glDisable(GL_DEPTH_TEST);
-    
+
+//   	glDisable(GL_ALPHA_TEST);
+
     // set global variables
     GAME = new Game();
     WINDOW_WIDTH = WINDOW_INIT_WIDTH;
     WINDOW_HEIGHT = WINDOW_INIT_HEIGHT;
     LAST_MODE = Game::STARTING;
 	glLineWidth(8.0);
+
+	// load textures
+	BACKGROUND[0] = new GLTexture("images/space01.png");
+	BACKGROUND[1] = new GLTexture("images/space02.png");
+	BACKGROUND[2] = new GLTexture("images/space03.png");
+	BACKGROUND[3] = new GLTexture("images/space04.png");
+	BACKGROUND[4] = new GLTexture("images/space05.png");
+	BACKGROUND[5] = new GLTexture("images/space06.png");
+	BACKGROUND[6] = new GLTexture("images/space07.png");
+	BACKGROUND[7] = new GLTexture("images/space08.png");
+	BACKGROUND[8] = new GLTexture("images/space09.png");
+	BACKGROUND[9] = new GLTexture("images/space10.png");
+	BACKGROUND[10] = new GLTexture("images/end.png");
 }
 
 
@@ -94,7 +108,8 @@ void renderGame(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
     
-    drawPaddle();
+	drawBackground();
+	drawPaddle();
     drawBall();
     drawBricks();
     drawScore();
@@ -105,18 +120,31 @@ void renderGame(void) {
 
 void drawPaddle() {
     Paddle *paddle = GAME->getPaddle();
+    float x = paddle->getPos()->getX();
+    float y = paddle->getPos()->getY();
+    float width = paddle->getW();
+    float height = paddle->getH();
 
-    // set color
-    glColor3f(paddle->getColor()->getR(), 
-              paddle->getColor()->getG(),
-              paddle->getColor()->getB()
-    );
+    glBegin(GL_TRIANGLE_STRIP);
+		glColor3f(paddle->getColor()->getR() / 2.5, paddle->getColor()->getG()
+				/ 2.5, paddle->getColor()->getB() / 2.5);
+		glVertex2f(x, y);
+		glVertex2f(x + width, y);
+		glColor3f(paddle->getColor()->getR(), paddle->getColor()->getG(),
+				paddle->getColor()->getB());
+		glVertex2f(x + width / 2, y + height / 2);
+		glColor3f(paddle->getColor()->getR() / 2.5, paddle->getColor()->getG()
+				/ 2.5, paddle->getColor()->getB() / 2.5);
+		glVertex2f(x + width, y + height);
+		glVertex2f(x, y + height);
+		glColor3f(paddle->getColor()->getR(), paddle->getColor()->getG(),
+				paddle->getColor()->getB());
+		glVertex2f(x + width / 2, y + height / 2.5);
+		glColor3f(paddle->getColor()->getR() / 2.5, paddle->getColor()->getG()
+				/ 2.5, paddle->getColor()->getB() / 2.5);
+		glVertex2f(x, y);
+	glEnd();
 
-    // set position
-    glRectf(paddle->getPos()->getX(),
-    		paddle->getPos()->getY(),
-    		paddle->getPos()->getX() + paddle->getW(),
-    		paddle->getPos()->getY() + paddle->getH());
 }
 
 void drawBall() {
@@ -144,15 +172,14 @@ void drawBall() {
 			vectorY1 = vectorY;
 			vectorX1 = vectorX;
 		}
-	glEnd();
 
-	// set color
-	glColor3f(ball->getColor()->getR()-0.3,
+		// set color
+		glColor3f(ball->getColor()->getR()-0.3,
 			ball->getColor()->getG()-0.3,
-	        ball->getColor()->getB()-0.3
-	);
-	radius = ball->getRadius() - 0.0025;
-	glBegin(GL_TRIANGLES);
+		    ball->getColor()->getB()-0.3
+		);
+		radius = ball->getRadius() - 0.0025;
+
 		for (int i = 0; i <= NUM_TRIANGLES_IN_CIRCLE; i++) {
 			float angle = (float) (((double) i) / TRIANGLE_ANGLE_IN_CIRCLE);
 			float vectorX = originX + (radius * (float) sin((double) angle));
@@ -170,18 +197,33 @@ void drawBall() {
 void drawBricks() {
 	std::list<Brick *> *bricks = GAME->getBricks();
 	std::list<Brick *>::iterator itr;
+	float x, y, width, height;
 
 	for (itr = bricks->begin(); itr != bricks->end(); itr++) {
 		Brick *brick = (*itr);
-
-		// set color
-		glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
-				brick->getColor()->getB());
-
-		// set position
-		glRectf(brick->getPos()->getX(), brick->getPos()->getY(),
-						brick->getPos()->getX() + brick->getW(),
-						brick->getPos()->getY() + brick->getH());
+		x = brick->getPos()->getX();
+		y = brick->getPos()->getY();
+		width = brick->getW();
+		height = brick->getH();
+		glBegin(GL_TRIANGLE_STRIP);
+			glColor3f(brick->getColor()->getR() / 2.5, brick->getColor()->getG()
+					/ 2.5, brick->getColor()->getB() / 2.5);
+			glVertex2f(x, y);
+			glVertex2f(x + width, y);
+			glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
+					brick->getColor()->getB());
+			glVertex2f(x + width / 2, y + height / 2);
+			glColor3f(brick->getColor()->getR() / 2.5, brick->getColor()->getG()
+					/ 2.5, brick->getColor()->getB() / 2.5);
+			glVertex2f(x + width, y + height);
+			glVertex2f(x, y + height);
+			glColor3f(brick->getColor()->getR(), brick->getColor()->getG(),
+					brick->getColor()->getB());
+			glVertex2f(x + width / 2, y + height / 2.5);
+			glColor3f(brick->getColor()->getR() / 2.5, brick->getColor()->getG()
+					/ 2.5, brick->getColor()->getB() / 2.5);
+			glVertex2f(x, y);
+		glEnd();
 	}
 }
 
@@ -230,24 +272,14 @@ void drawScore() {
 	glBegin(GL_LINES);
 		glVertex2f(0.28, SCORE_POSITION);
 		glVertex2f(0.28, 1);
-	glEnd();
-	glBegin(GL_LINES);
 		glVertex2f(0.000, SCORE_POSITION);
 		glVertex2f(COORD_RANGE, SCORE_POSITION);
-	glEnd();
-	glBegin(GL_LINES);
 		glVertex2f(0.002, SCORE_POSITION);
 		glVertex2f(0.002, 1);
-	glEnd();
-	glBegin(GL_LINES);
 		glVertex2f(0.998, SCORE_POSITION);
 		glVertex2f(0.998, 1);
-	glEnd();
-	glBegin(GL_LINES);
 		glVertex2f(0.002, 0.998);
 		glVertex2f(COORD_RANGE, 0.998);
-	glEnd();
-	glBegin(GL_LINES);
 		glVertex2f(0.998, SCORE_POSITION);
 		glVertex2f(0.998, 1);
 	glEnd();
@@ -257,6 +289,7 @@ void drawPaused() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
 
+	drawBackground();
 	drawPaddle();
 	drawBall();
 	drawBricks();
@@ -306,6 +339,7 @@ void drawStateInfo() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
 
+	drawBackground();
 	drawPaddle();
 	drawBall();
 	drawBricks();
@@ -357,6 +391,7 @@ void drawGameOver() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
 
+	drawBackground();
 	drawPaddle();
 	drawBall();
 	drawBricks();
@@ -401,6 +436,7 @@ void drawWin() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
 
+	drawBackground();
 	drawScore();
 
 	// set color
@@ -440,16 +476,11 @@ void drawFinish() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
 
+	drawBackground();
 	drawScore();
 
 	// set color
-	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
-		SCORE_DEFAULT_COLOR_B
-	);
-
-	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
-			SCORE_DEFAULT_COLOR_B
-	);
+	glColor3f(0,0,0);
 	sprintf(buffer, "CONGRATULATIONS !!!");
 	drawText(0.32, 0.7, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
 	sprintf(buffer, "YOU SPENT %ld MINUTES (%lds) OF YOUR LIFE", GAME->getTimer()/60000, GAME->getTimer()/1000);
@@ -465,10 +496,36 @@ void drawFinish() {
 	sprintf(buffer, "lucmir@dcc.ufmg.br");
 	drawText(0.393, 0.23, buffer, GLUT_BITMAP_9_BY_15);
 
+	glColor3f(SCORE_DEFAULT_COLOR_R, SCORE_DEFAULT_COLOR_G,
+		SCORE_DEFAULT_COLOR_B
+	);
+	sprintf(buffer, "CONGRATULATIONS !!!");
+	drawText(0.3215, 0.7, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "YOU SPENT %ld MINUTES (%lds) OF YOUR LIFE", GAME->getTimer()/60000, GAME->getTimer()/1000);
+	drawText(0.2715, 0.63, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "PRESS \"r\" TO SPEND MORE");
+	drawText(0.362, 0.57, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "TOTAL SCORE: %.3d", GAME->getTotalScore());
+	drawText(0.402, 0.5, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "CREDITS");
+	drawText(0.4305, 0.35, buffer, GLUT_BITMAP_TIMES_ROMAN_24);
+	sprintf(buffer, "Lucas Cunha de Oliveira Miranda");
+	drawText(0.320, 0.28, buffer, GLUT_BITMAP_9_BY_15);
+	sprintf(buffer, "lucmir@dcc.ufmg.br");
+	drawText(0.394, 0.23, buffer, GLUT_BITMAP_9_BY_15);
+
 	glPopMatrix();
 	glutSwapBuffers();
 }
 
+void drawBackground() {
+	int num = (GAME->getMode() == Game::FINISHED) ? 10 :
+		(GAME->getLevel()-1)%10;
+	glColor3f(1.0, 1.0, 1.0);
+	glEnable(GL_TEXTURE_2D);
+	BACKGROUND[num]->drawEntire(0, 1, 1, 0);
+	glDisable(GL_TEXTURE_2D);
+}
 
 void drawText(float x, float y, char *string, void *font)
 {

@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "game.h"
+#include "glTexture.h"
 
 // constants
 #define NUM_TRIANGLES_IN_CIRCLE		720
@@ -18,11 +19,18 @@
 
 // variables
 Game *GAME;
+
 GLsizei WINDOW_WIDTH;
 GLsizei WINDOW_HEIGHT;
+
 bool MOUSE_IN = true;
+
 Game::GameMode LAST_MODE;
+
 bool CHEAT[4];
+
+GLTexture *BACKGROUND[11];
+
 
 // prototypes
 int main(int argc, char** argv);
@@ -47,5 +55,6 @@ void drawStateInfo();
 void drawGameOver();
 void drawWin();
 void drawFinish();
+void drawBackground();
 
 #endif

@@ -34,8 +34,8 @@
 #define INITIAL_NUM_BRICKS			 4
 
 // paddle
-#define PADDLE_DEFAULT_WIDTH        0.125f
-#define PADDLE_DEFAULT_HEIGHT       0.015f
+#define PADDLE_DEFAULT_WIDTH        0.135f
+#define PADDLE_DEFAULT_HEIGHT       0.018f
 #define PADDLE_DEFAULT_COLOR_R      0.5f
 #define PADDLE_DEFAULT_COLOR_G      0.5f
 #define PADDLE_DEFAULT_COLOR_B      0.0f
@@ -72,7 +72,7 @@
 // score
 #define SCORE_POSITION			   	0.92f
 #define SCORE_DEFAULT_COLOR_R       0.0f
-#define SCORE_DEFAULT_COLOR_G       1.0f
+#define SCORE_DEFAULT_COLOR_G       0.9f
 #define SCORE_DEFAULT_COLOR_B       0.0f
 
 
